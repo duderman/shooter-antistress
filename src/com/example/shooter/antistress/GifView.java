@@ -25,7 +25,7 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 	public static final int DECODE_STATUS_DECODING = 1;
 	public static final int DECODE_STATUS_DECODED = 2;
 	
-	public static final int FPS = 100;
+	public static final int FPS = 24;
 	public static final int LOOPS = 1;
 	private int loopedTimes = 0;
 
@@ -115,9 +115,8 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 					imageType = IMAGE_TYPE_DYNAMIC;
 				}
 				totalTimeGif = decoder.getDuration();
-				stepX = totalX/((totalTimeGif*LOOPS)/1000);
+				stepX = totalX/((totalTimeGif*LOOPS)*FPS/1000);
 				Log.d("Dimensions","totalTimeGif="+Float.toString(totalTimeGif)+"; stepX="+Float.toString(stepX)+"; totalX="+Float.toString(totalX));
-//				postInvalidate();
 				decodeStatus = DECODE_STATUS_DECODED;
 			}
 		}.start();
@@ -132,15 +131,12 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 		super.onDraw(canvas);
 
 		if (decodeStatus == DECODE_STATUS_UNDECODE) { 
-//			canvas.drawBitmap(bitmap, x, y, null);
 			if (playFlag) {
 				decode();
 				lastStepTimeX = lastStepTimeGif = System.currentTimeMillis();
-//				postInvalidate();
 			}
 		} else if (decodeStatus == DECODE_STATUS_DECODING) {
-//			canvas.drawBitmap(bitmap, x, y, null);
-//			postInvalidate();
+			
 		} else if (decodeStatus == DECODE_STATUS_DECODED) {
 			if (imageType == IMAGE_TYPE_STATIC) {
 				canvas.drawBitmap(bitmap, x, y, null);
@@ -148,7 +144,9 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 				if (playFlag) {
 					long now = System.currentTimeMillis();
 					
-					updateCoordinates();
+					if (now - lastStepTimeX >= 1000 / FPS) {
+						updateCoordinates();
+					}
 					
 					if(now-lastStepTimeGif>=decoder.getDelay(currFrame)){
 						lastStepTimeGif = now;
@@ -245,10 +243,10 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 			x -= stepX*(int)(timeDiff/1000);
 			Log.d("x dec", Integer.toString((int)(timeDiff/1000)));
 		}
-//		if ((timeDiff % 1000)/(1000/FPS) > 0){
-			x -= (stepX/FPS)*((timeDiff % 1000)/(1000/FPS));
+		if ((timeDiff % 1000)/(1000/FPS) > 0){
+			x -= stepX*((timeDiff % 1000)/(1000/FPS));
 			Log.d("x dec", Float.toString((stepX/FPS)*((timeDiff % 1000)/(1000/FPS))));
-//		}
+		}
 		y = this.getHeight()-2*(-x+this.getWidth());
 		lastStepTimeX = System.currentTimeMillis();
 		Log.d("Coordinates", "("+Float.toString(x)+"; "+Float.toString(y)+")");
