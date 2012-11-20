@@ -1,0 +1,117 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#090FBD"
+    android:gravity="fill_vertical" >
+
+    <TextView
+        android:id="@+id/TitleTextView"
+        style="@style/TitleTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="#000000"
+        android:gravity="center"
+        android:minLines="2"
+        android:text="@string/menu_name_title"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/greetingTextView"
+        style="@style/GreetingTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/TitleTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="@string/menu_greeting"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/greetingTextView"
+        android:layout_centerHorizontal="true"
+        android:gravity="fill_vertical" >
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <ImageButton
+                android:id="@+id/tomatoImageButton"
+                style="@style/ImageButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center|right"
+                android:layout_margin="20dp"
+                android:src="@drawable/apple"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/bottleImageButton"
+                style="@style/ImageButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center|left"
+                android:layout_margin="20dp"
+                android:src="@drawable/ic_launcher"
+                tools:ignore="ContentDescription" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <ImageButton
+                android:id="@+id/axeImageButton"
+                style="@style/ImageButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center|right"
+                android:layout_margin="20dp"
+                android:src="@drawable/ic_launcher" />
+
+            <ImageButton
+                android:id="@+id/EggImageButton"
+                style="@style/ImageButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center|left"
+                android:layout_margin="20dp"
+                android:src="@drawable/ic_launcher" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <ImageButton
+                android:id="@+id/hunterKnifeImageButton"
+                style="@style/ImageButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center|right"
+                android:layout_margin="20dp"
+                android:src="@drawable/ic_launcher" />
+
+            <ImageButton
+                android:id="@+id/knifeImageButton"
+                style="@style/ImageButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center|left"
+                android:layout_margin="20dp"
+                android:src="@drawable/ic_launcher" />
+        </TableRow>
+
+    </TableLayout>
+
+</RelativeLayout>

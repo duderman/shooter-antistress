@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">Shooter Antistress</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">Shooter Antistress</string>
+    <string name="menu_name_title">Shooter \nAntistress</string>
+    <string name="menu_greeting">Welcome! \nSelect a subject:</string>
+    <string name="throw_button_caption">Throw!</string>
+    <string name="title_activity_camera">Throw object!</string>
+
+</resources>
