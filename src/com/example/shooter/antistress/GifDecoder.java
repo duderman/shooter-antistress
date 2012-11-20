@@ -1,3 +1,8 @@
+/*
+ * Apache License v2.0
+ * Created By Tomoki Yamashita
+*/
+
 package com.example.shooter.antistress;
 
 import java.io.InputStream;
