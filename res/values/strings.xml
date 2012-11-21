@@ -7,5 +7,9 @@
     <string name="menu_greeting">Welcome! \nSelect a subject:</string>
     <string name="throw_button_caption">Throw!</string>
     <string name="title_activity_camera">Throw object!</string>
+    <string name="save_button_caption">Save</string>
+    <string name="share_button_caption">Share</string>
+    <string name="title_share_camera">Share this with...</string>
+    <string name="throw_button_back_caption">Back</string>
 
 </resources>

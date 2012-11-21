@@ -252,4 +252,14 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 	public void surfaceChanged(SurfaceHolder holder, int format,
 			int width, int height) {
 	}
+	
+	public void getFinalBitmap(Canvas c){
+		c.drawBitmap(bitmap, x, y, null);
+	}
+	
+	public void clear(){
+		Canvas c = this.getHolder().lockCanvas();
+		c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+		this.getHolder().unlockCanvasAndPost(c);
+	}
 }

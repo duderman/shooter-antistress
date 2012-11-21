@@ -1,8 +1,16 @@
 package com.example.shooter.antistress;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import android.app.Activity;
+import android.app.Application;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,10 +18,12 @@ import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.Bitmap.CompressFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -25,14 +35,22 @@ import android.widget.Toast;
 public class Main extends Activity implements SurfaceHolder.Callback,
 		Camera.AutoFocusCallback, Camera.PreviewCallback,
 		Camera.PictureCallback {
+	private static final int SAVE_IMAGE_RESULT_SUCCES = 0;
+	private static final int SAVE_IMAGE_RESULT_FAIL = 1;
+	private static final int SAVE_IMAGE_RESULT_UNKNOW = 3;
+	
+	private static final String JPEG_FILE_PREFIX = "IMG_";
+	private static final String JPEG_FILE_SUFFIX = ".jpg";
 
 	private SurfaceView cameraView;
 	private GifView weaponView;
 	private SurfaceHolder cameraHolder;
 	private SurfaceHolder weaponHolder;
 	private Camera camera;
-	private Bitmap weaponBmp;
 	private Button throwButton;
+	private Button saveButton;
+	private Button shareButton;
+	public Bitmap finalBitmap;
 
 	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.ERROR;
 	private enum CameraViewStatusCodes {  ERROR, WAITING, AUTOFOCUSING, DRAWING, DRAWING_ENDED };
@@ -54,6 +72,10 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 		weaponView.setGif(R.drawable.apple);
 		throwButton = (Button)findViewById(R.id.throwButton);
 		throwButton.setOnClickListener(myBtnOnClickListener);
+		saveButton = (Button)findViewById(R.id.saveButton);
+		saveButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
+		shareButton = (Button)findViewById(R.id.shareButton);
+		shareButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
 		weaponHolder.addCallback(weaponView);
 	}
 
@@ -122,9 +144,10 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				camera.autoFocus(myAutoFocusCallback);
 			}break;
 			case DRAWING_ENDED: {
-				Canvas c = weaponHolder.lockCanvas();
-				c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-				weaponHolder.unlockCanvasAndPost(c);
+				weaponView.clear();
+				saveButton.setVisibility(View.INVISIBLE);
+				shareButton.setVisibility(View.INVISIBLE);
+				throwButton.setText(R.string.throw_button_caption);
 
 				cameraViewStatus = CameraViewStatusCodes.WAITING;
 				camera.startPreview();
@@ -137,6 +160,21 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				Toast.makeText(getApplicationContext(),
 						"Have no idea what this is :(", Toast.LENGTH_LONG).show();
 			}break;
+			}
+		}
+	};
+	
+	OnClickListener mySaveAndShareBtnOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			int saveResult = saveFinalImage();
+			saveButton.setVisibility(View.INVISIBLE);
+			if(v.getId()==saveButton.getId()){
+				if(saveResult == SAVE_IMAGE_RESULT_SUCCES){
+					Toast.makeText(getApplicationContext(), "Saving succeful", Toast.LENGTH_SHORT);
+				}
+			} else {
+				
 			}
 		}
 	};
@@ -155,12 +193,59 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			Throw();
 			cameraViewStatus = CameraViewStatusCodes.DRAWING_ENDED;
 			throwButton.setVisibility(View.VISIBLE);
+			saveButton.setVisibility(View.VISIBLE);
+			shareButton.setVisibility(View.VISIBLE);
+			throwButton.setText(R.string.throw_button_back_caption);
+			
+			Canvas finalCanvas = new Canvas(finalBitmap);
+			finalCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+			finalCanvas.drawBitmap(BitmapFactory.decodeByteArray(data, 0, data.length), 0, 0, null);
+			weaponView.getFinalBitmap(finalCanvas);
+			finalCanvas.save();
+			
 		}
 	};
 	
 	private void Throw() {
 		weaponView.setGif(R.drawable.apple);
 		weaponView.play();
+	}
+	
+	private int saveFinalImage(){
+		int savingResult = SAVE_IMAGE_RESULT_UNKNOW;
+		
+		if (Environment.getExternalStorageState().equals(
+				Environment.MEDIA_MOUNTED)) {
+			try {
+				File saveDir = new File(Environment
+						.getExternalStoragePublicDirectory(
+								Environment.DIRECTORY_PICTURES).getPath()
+						+ R.string.app_name + "/");
+				if (!saveDir.exists()) {
+					saveDir.mkdirs();
+				}
+				File imageFile = new File(saveDir,
+						JPEG_FILE_PREFIX + 
+						new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + 
+						JPEG_FILE_SUFFIX);
+				
+				FileOutputStream fos = new FileOutputStream(imageFile);
+				finalBitmap.compress(CompressFormat.JPEG, 95, fos);
+				savingResult = SAVE_IMAGE_RESULT_SUCCES;
+			} catch (FileNotFoundException e) {
+				savingResult = SAVE_IMAGE_RESULT_FAIL;
+				e.printStackTrace();
+				// TODO: localize toasts
+				Toast.makeText(getApplicationContext(), "Error creating file. Sorry :(", Toast.LENGTH_LONG).show();
+			} catch (IOException e){
+				savingResult = SAVE_IMAGE_RESULT_FAIL;
+				e.printStackTrace();
+				Toast.makeText(getApplicationContext(), "Error writing file. Sorry :(", Toast.LENGTH_LONG).show();
+			}
+		}
+		
+		
+		return savingResult;
 	}
 	
 }
