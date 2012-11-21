@@ -149,7 +149,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				weaponView.clear();
 				saveButton.setVisibility(View.INVISIBLE);
 				shareButton.setVisibility(View.INVISIBLE);
-				throwButton.setText(R.string.throw_button_caption);
+				throwButton.setText(getString(R.string.throw_button_caption));
 
 				cameraViewStatus = CameraViewStatusCodes.WAITING;
 				camera.startPreview();
@@ -203,7 +203,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			throwButton.setVisibility(View.VISIBLE);
 			saveButton.setVisibility(View.VISIBLE);
 			shareButton.setVisibility(View.VISIBLE);
-			throwButton.setText(R.string.throw_button_back_caption);
+			throwButton.setText(getString(R.string.throw_button_back_caption));
 			
 			Canvas finalCanvas = new Canvas(finalBitmap);
 			finalCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -228,7 +228,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				File saveDir = new File(Environment
 						.getExternalStoragePublicDirectory(
 								Environment.DIRECTORY_PICTURES).getPath()
-						+ R.string.app_name + "/");
+						+ getString(R.string.app_name) + "/");
 				if (!saveDir.exists()) {
 					saveDir.mkdirs();
 				}
