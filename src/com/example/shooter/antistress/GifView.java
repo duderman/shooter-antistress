@@ -37,7 +37,8 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 
 	private int width;
 	private int height;
-	private float x,y,minX,stepX,totalX, totalTimeGif;
+	private float minX,stepX,totalX, totalTimeGif;
+	private static float x, y;
 	long lastStepTimeX, timeStepX, lastStepTimeGif;
 	
 	private int currFrame;

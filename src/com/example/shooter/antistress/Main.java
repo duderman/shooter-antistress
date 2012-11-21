@@ -42,10 +42,6 @@ import android.widget.Toast;
 public class Main extends Activity implements SurfaceHolder.Callback,
 		Camera.AutoFocusCallback, Camera.PreviewCallback,
 		Camera.PictureCallback {
-	private static final int SAVE_IMAGE_RESULT_SUCCES = 0;
-	private static final int SAVE_IMAGE_RESULT_FAIL = 1;
-	private static final int SAVE_IMAGE_RESULT_UNKNOW = 3;
-	
 	private static final String JPEG_FILE_PREFIX = "IMG_";
 	private static final String JPEG_FILE_SUFFIX = ".jpg";
 
@@ -58,6 +54,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 	private Button saveButton;
 	private Button shareButton;
 	public Bitmap finalBitmap;
+	Uri fileUri = Uri.EMPTY;
 
 	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.ERROR;
 	private enum CameraViewStatusCodes {  ERROR, WAITING, AUTOFOCUSING, DRAWING, DRAWING_ENDED };
@@ -152,6 +149,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			}break;
 			case DRAWING_ENDED: {
 				weaponView.clear();
+				fileUri = Uri.EMPTY;
 				saveButton.setVisibility(View.INVISIBLE);
 				shareButton.setVisibility(View.INVISIBLE);
 				throwButton.setText(getString(R.string.throw_button_caption));
@@ -174,8 +172,10 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 	OnClickListener mySaveAndShareBtnOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			Uri fileUri = saveFinalImage();
+			if(saveButton.getVisibility() != View.INVISIBLE){
+			fileUri = saveFinalImage();
 			saveButton.setVisibility(View.INVISIBLE);
+			}
 			if (fileUri != Uri.EMPTY) {
 				if (v.getId() == saveButton.getId()) {
 					Toast.makeText(getApplicationContext(), "Saving succeful",
