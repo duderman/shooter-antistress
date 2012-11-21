@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -13,6 +17,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -205,11 +210,34 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			shareButton.setVisibility(View.VISIBLE);
 			throwButton.setText(getString(R.string.throw_button_back_caption));
 			
-			Canvas finalCanvas = new Canvas(finalBitmap);
-			finalCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-			finalCanvas.drawBitmap(BitmapFactory.decodeByteArray(data, 0, data.length), 0, 0, null);
-			weaponView.getFinalBitmap(finalCanvas);
-			finalCanvas.save();
+			try {
+				Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+				int fotoBitmapWidth = fotoBitmap.getWidth();
+				int fotoBitmapHeight = fotoBitmap.getHeight();
+				File tmpFile = new File(getExternalCacheDir().getPath()+"tmpImage.dat");
+				tmpFile.getParentFile().mkdirs();
+				RandomAccessFile randomAccessFile = new RandomAccessFile(tmpFile, "rw");
+				FileChannel fileChannel = randomAccessFile.getChannel();
+				MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0, fotoBitmapWidth*fotoBitmapHeight*4);
+				fotoBitmap.copyPixelsToBuffer(map);
+				fotoBitmap.recycle();
+				
+				finalBitmap = Bitmap.createBitmap(fotoBitmapWidth, fotoBitmapHeight, Config.ARGB_8888);
+				map.position(0);
+				finalBitmap.copyPixelsFromBuffer(map);
+				fileChannel.close();
+				randomAccessFile.close();
+				
+				Canvas finalCanvas = new Canvas(finalBitmap);
+				weaponView.getFinalBitmap(finalCanvas);
+				finalCanvas.save();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 	};
