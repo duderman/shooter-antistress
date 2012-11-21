@@ -38,7 +38,7 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 	private int width;
 	private int height;
 	private float minX,stepX,totalX, totalTimeGif;
-	private static float x, y;
+	private float x, y;
 	long lastStepTimeX, timeStepX, lastStepTimeGif;
 	
 	private int currFrame;
@@ -225,6 +225,7 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	private void updateCoordinates(){
+		// TODO: change when to create first lastStepTimeX;
 		long timeDiff = System.currentTimeMillis()-lastStepTimeX;
 		Log.d("timeDiff", Long.toString(timeDiff));
 		if(timeDiff >= 1000){

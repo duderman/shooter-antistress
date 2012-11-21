@@ -36,6 +36,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -109,6 +110,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			Camera.Parameters parameters = camera.getParameters();
 			parameters.setPictureFormat(ImageFormat.JPEG);
 			parameters.setRotation(90);
+			//TODO: set picture size like the display size
 
 			camera.setParameters(parameters);
 
@@ -255,7 +257,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			try {
 				File saveDir = new File(Environment
 						.getExternalStoragePublicDirectory(
-								Environment.DIRECTORY_PICTURES).getPath()
+								Environment.DIRECTORY_PICTURES).getPath() + "/"
 						+ getString(R.string.app_name) + "/");
 				if (!saveDir.exists()) {
 					saveDir.mkdirs();
