@@ -22,3 +22,6 @@ local.properties
 .DS_Store
 */._.DS_Store
 */.DS_Store
+
+#debugging paths
+debugpics/
