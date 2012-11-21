@@ -9,6 +9,7 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
@@ -22,6 +23,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -167,14 +169,20 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 	OnClickListener mySaveAndShareBtnOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			int saveResult = saveFinalImage();
+			Uri fileUri = saveFinalImage();
 			saveButton.setVisibility(View.INVISIBLE);
-			if(v.getId()==saveButton.getId()){
-				if(saveResult == SAVE_IMAGE_RESULT_SUCCES){
-					Toast.makeText(getApplicationContext(), "Saving succeful", Toast.LENGTH_SHORT);
+			if (fileUri != Uri.EMPTY) {
+				if (v.getId() == saveButton.getId()) {
+					Toast.makeText(getApplicationContext(), "Saving succeful",
+							Toast.LENGTH_SHORT).show();
+				} else {
+					Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+					sharingIntent.setType("image/jpeg");
+					sharingIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+					startActivity(Intent.createChooser(sharingIntent,
+							getString(R.string.title_share_camera)));
+					shareButton.setVisibility(View.INVISIBLE);
 				}
-			} else {
-				
 			}
 		}
 	};
@@ -211,8 +219,8 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 		weaponView.play();
 	}
 	
-	private int saveFinalImage(){
-		int savingResult = SAVE_IMAGE_RESULT_UNKNOW;
+	private Uri saveFinalImage(){
+		Uri uri = Uri.EMPTY;
 		
 		if (Environment.getExternalStorageState().equals(
 				Environment.MEDIA_MOUNTED)) {
@@ -231,21 +239,20 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				
 				FileOutputStream fos = new FileOutputStream(imageFile);
 				finalBitmap.compress(CompressFormat.JPEG, 95, fos);
-				savingResult = SAVE_IMAGE_RESULT_SUCCES;
+				uri = Uri.fromFile(imageFile);
 			} catch (FileNotFoundException e) {
-				savingResult = SAVE_IMAGE_RESULT_FAIL;
 				e.printStackTrace();
 				// TODO: localize toasts
 				Toast.makeText(getApplicationContext(), "Error creating file. Sorry :(", Toast.LENGTH_LONG).show();
 			} catch (IOException e){
-				savingResult = SAVE_IMAGE_RESULT_FAIL;
 				e.printStackTrace();
 				Toast.makeText(getApplicationContext(), "Error writing file. Sorry :(", Toast.LENGTH_LONG).show();
 			}
+		} else {
+			Toast.makeText(getApplicationContext(), "Your storage seems was unplugged", Toast.LENGTH_LONG).show();
 		}
 		
-		
-		return savingResult;
+		return uri;
 	}
 	
 }
