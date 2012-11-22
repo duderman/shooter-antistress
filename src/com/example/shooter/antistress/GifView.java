@@ -85,6 +85,7 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 		this.resId = resId;
 		imageType = IMAGE_TYPE_UNKNOWN;
 		decodeStatus = DECODE_STATUS_UNDECODE;
+		lastStepTimeGif = lastStepTimeX = 0;
 		playFlag = false;
 		bitmap = cacheImage;
 		width = bitmap.getScaledWidth(bitmap.getDensity());

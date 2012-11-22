@@ -45,6 +45,9 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 		Camera.PictureCallback {
 	private static final String JPEG_FILE_PREFIX = "IMG_";
 	private static final String JPEG_FILE_SUFFIX = ".jpg";
+	
+	private static final int PHOTO_WIDTH = 480;
+	private static final int PHOTO_HEIGHT = 720;
 
 	private SurfaceView cameraView;
 	private GifView weaponView;
@@ -110,8 +113,6 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			Camera.Parameters parameters = camera.getParameters();
 			parameters.setPictureFormat(ImageFormat.JPEG);
 			parameters.setRotation(90);
-			//TODO: set picture size like the display size
-
 			camera.setParameters(parameters);
 
 			camera.setDisplayOrientation(90);
@@ -152,6 +153,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			case DRAWING_ENDED: {
 				weaponView.clear();
 				fileUri = Uri.EMPTY;
+				finalBitmap.recycle();
 				saveButton.setVisibility(View.INVISIBLE);
 				shareButton.setVisibility(View.INVISIBLE);
 				throwButton.setText(getString(R.string.throw_button_caption));
@@ -174,22 +176,20 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 	OnClickListener mySaveAndShareBtnOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			if(saveButton.getVisibility() != View.INVISIBLE){
-			fileUri = saveFinalImage();
-			saveButton.setVisibility(View.INVISIBLE);
-			}
-			if (fileUri != Uri.EMPTY) {
-				if (v.getId() == saveButton.getId()) {
-					Toast.makeText(getApplicationContext(), "Saving succeful",
-							Toast.LENGTH_SHORT).show();
-				} else {
-					Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-					sharingIntent.setType("image/jpeg");
-					sharingIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
-					startActivity(Intent.createChooser(sharingIntent,
-							getString(R.string.title_share_camera)));
-					shareButton.setVisibility(View.INVISIBLE);
+			if (v.getId() == saveButton.getId()) {
+				fileUri = saveFinalImage();
+				if (fileUri != Uri.EMPTY) {
+				saveButton.setVisibility(View.INVISIBLE);
+				Toast.makeText(getApplicationContext(), "Saving succeful",
+						Toast.LENGTH_SHORT).show();
 				}
+			} else {
+				Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+				sharingIntent.setType("image/jpeg");
+				sharingIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+				startActivity(Intent.createChooser(sharingIntent,
+						getString(R.string.title_share_camera)));
+				shareButton.setVisibility(View.INVISIBLE);
 			}
 		}
 	};
@@ -214,7 +214,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			
 			try {
 				Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-				int fotoBitmapWidth = fotoBitmap.getWidth();
+				/*int fotoBitmapWidth = fotoBitmap.getWidth();
 				int fotoBitmapHeight = fotoBitmap.getHeight();
 				File tmpFile = new File(getExternalCacheDir().getPath()+"tmpImage.dat");
 				tmpFile.getParentFile().mkdirs();
@@ -228,16 +228,16 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				map.position(0);
 				finalBitmap.copyPixelsFromBuffer(map);
 				fileChannel.close();
-				randomAccessFile.close();
+				randomAccessFile.close();*/
+				if(!fotoBitmap.isMutable()){
+					finalBitmap = Bitmap.createScaledBitmap(fotoBitmap, PHOTO_WIDTH, PHOTO_HEIGHT, false);
+					fotoBitmap.recycle();
+				}
 				
 				Canvas finalCanvas = new Canvas(finalBitmap);
 				weaponView.getFinalBitmap(finalCanvas);
 				finalCanvas.save();
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
