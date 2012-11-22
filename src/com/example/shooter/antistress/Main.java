@@ -184,6 +184,9 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 						Toast.LENGTH_SHORT).show();
 				}
 			} else {
+				if(fileUri == Uri.EMPTY){
+					onClick(saveButton);
+				}
 				Intent sharingIntent = new Intent(Intent.ACTION_SEND);
 				sharingIntent.setType("image/jpeg");
 				sharingIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
