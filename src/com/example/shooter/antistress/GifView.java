@@ -134,7 +134,6 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 		if (decodeStatus == DECODE_STATUS_UNDECODE) { 
 			if (playFlag) {
 				decode();
-				lastStepTimeX = lastStepTimeGif = System.currentTimeMillis();
 			}
 		} else if (decodeStatus == DECODE_STATUS_DECODING) {
 			
@@ -226,6 +225,9 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 	
 	private void updateCoordinates(){
 		// TODO: change when to create first lastStepTimeX;
+		if(lastStepTimeX == 0){
+			lastStepTimeGif = lastStepTimeX = System.currentTimeMillis();
+		}
 		long timeDiff = System.currentTimeMillis()-lastStepTimeX;
 		Log.d("timeDiff", Long.toString(timeDiff));
 		if(timeDiff >= 1000){
