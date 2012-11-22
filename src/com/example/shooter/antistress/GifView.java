@@ -12,8 +12,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.widget.LinearLayout.LayoutParams;
 
 public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -246,16 +244,19 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
+		Log.d("watch", "SurfaceDestroyed wv");
 	}
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		setWillNotDraw(false);
+		Log.d("watch", "SurfaceCreated wv");
+		//TODO: draw if was paused
 	}
 
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format,
 			int width, int height) {
+		Log.d("watch", "SurfaceChanged wv");
 	}
 	
 	public void getFinalBitmap(Canvas c){
