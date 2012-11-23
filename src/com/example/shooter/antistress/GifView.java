@@ -188,6 +188,7 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	public void play() {
+		//TODO two threads for changing coordinates by FPS and frames by delay
 		playFlag = true;
 		while(playFlag){
 			Canvas c = getHolder().lockCanvas();

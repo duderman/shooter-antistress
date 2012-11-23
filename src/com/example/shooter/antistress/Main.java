@@ -28,6 +28,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class Main extends Activity implements SurfaceHolder.Callback,
@@ -48,7 +49,8 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 	private Button saveButton;
 	private Button shareButton;
 	public Bitmap finalBitmap;
-	Uri fileUri = Uri.EMPTY;
+	public Uri fileUri = Uri.EMPTY;
+	private RelativeLayout myLayout;
 
 	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.ERROR;
 
@@ -78,28 +80,31 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 		shareButton = (Button) findViewById(R.id.shareButton);
 		shareButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
 		weaponHolder.addCallback(weaponView);
+		myLayout = (RelativeLayout)getLayoutInflater().inflate(R.layout.main, null, false);
 		Log.d("watch", "onCreate");
 	}
 
 	@Override
-	protected void onPause() {
+	protected void onPause() {//test
 		super.onPause();
-		camera.stopPreview();
-		camera.release();
-		camera = null;
+		
 		Log.d("watch", "onPause");
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		camera = Camera.open();
+		//TODO onpause on resume causes saving and loading image (onSaveInstanceState)
+		/*camera = Camera.open();
 		if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
 			surfaceCreated(cameraHolder);
-		}
-		
-		
+		}*/
 		Log.d("watch", "onResume");
+	}
+	
+	@Override
+	protected void onPostResume() {
+		super.onPostResume();
 	}
 
 	@Override
@@ -120,6 +125,9 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.d("watch", "SurfaceDestroyed");
+		camera.stopPreview();
+		camera.release();
+		camera = null;
 	}
 
 	@Override
@@ -133,6 +141,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 		Log.d("watch", "SurfaceCreated");
 
 		try {
+			camera = Camera.open();
 			Camera.Parameters parameters = camera.getParameters();
 			parameters.setPictureFormat(ImageFormat.JPEG);
 			parameters.setRotation(90);
