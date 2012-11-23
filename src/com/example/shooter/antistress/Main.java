@@ -31,9 +31,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class Main extends Activity implements SurfaceHolder.Callback,
-		Camera.AutoFocusCallback, Camera.PreviewCallback,
-		Camera.PictureCallback {
+public class Main extends Activity implements SurfaceHolder.Callback {
 	private static final String JPEG_FILE_PREFIX = "IMG_";
 	private static final String JPEG_FILE_SUFFIX = ".jpg";
 
@@ -71,8 +69,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 		weaponView = ((GifView) findViewById(R.id.throwingObjectSurfaceView));
 		weaponHolder = weaponView.getHolder();
 		weaponHolder.setFormat(PixelFormat.TRANSLUCENT);
-		weaponView.setZOrderOnTop(true);
-		// weaponView.setGif(R.drawable.apple);
+		weaponView.setZOrderMediaOverlay(true);
 		throwButton = (Button) findViewById(R.id.throwButton);
 		throwButton.setOnClickListener(myBtnOnClickListener);
 		saveButton = (Button) findViewById(R.id.saveButton);
@@ -80,54 +77,48 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 		shareButton = (Button) findViewById(R.id.shareButton);
 		shareButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
 		weaponHolder.addCallback(weaponView);
-		myLayout = (RelativeLayout)getLayoutInflater().inflate(R.layout.main, null, false);
+		myLayout = (RelativeLayout) getLayoutInflater().inflate(R.layout.main,
+				null, false);
+		camera = Camera.open();
+		Camera.Parameters parameters = camera.getParameters();
+		parameters.setPictureFormat(ImageFormat.JPEG);
+		parameters.setRotation(90);
+		camera.setParameters(parameters);
+		camera.setDisplayOrientation(90);
+		cameraViewStatus = CameraViewStatusCodes.WAITING;
 		Log.d("watch", "onCreate");
 	}
 
 	@Override
-	protected void onPause() {//test
+	protected void onPause() {
 		super.onPause();
-		
+		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
+			camera.stopPreview();
+		}
 		Log.d("watch", "onPause");
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//TODO onpause on resume causes saving and loading image (onSaveInstanceState)
-		/*camera = Camera.open();
-		if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
-			surfaceCreated(cameraHolder);
-		}*/
+		// TODO onpause on resume causes saving and loading image
+		// (onSaveInstanceState)
+		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
+			camera.startPreview();
+		}
 		Log.d("watch", "onResume");
 	}
-	
-	@Override
-	protected void onPostResume() {
-		super.onPostResume();
-	}
 
 	@Override
-	public void onPictureTaken(byte[] data, Camera camera) {
-
-	}
-
-	@Override
-	public void onPreviewFrame(byte[] data, Camera camera) {
-
-	}
-
-	@Override
-	public void onAutoFocus(boolean arg0, Camera arg1) {
-
+	protected void onDestroy() {
+		super.onDestroy();
+		camera.release();
+		Log.d("watch", "onStop");
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.d("watch", "SurfaceDestroyed");
-		camera.stopPreview();
-		camera.release();
-		camera = null;
 	}
 
 	@Override
@@ -139,25 +130,15 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d("watch", "SurfaceCreated");
-
-		try {
-			camera = Camera.open();
-			Camera.Parameters parameters = camera.getParameters();
-			parameters.setPictureFormat(ImageFormat.JPEG);
-			parameters.setRotation(90);
-			camera.setParameters(parameters);
-			camera.setDisplayOrientation(90);
-			camera.setPreviewCallback(this);
-			camera.setPreviewDisplay(cameraHolder);
-
-			if (cameraViewStatus != CameraViewStatusCodes.DRAWING_ENDED) {
+		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
+			try {
+				camera.setPreviewDisplay(cameraHolder);
 				camera.startPreview();
-				cameraViewStatus = CameraViewStatusCodes.WAITING;
+			} catch (IOException e) {
+				e.printStackTrace();
+				cameraViewStatus = CameraViewStatusCodes.ERROR;
+				camera.release();
 			}
-		} catch (IOException e) {
-			Log.d("Throwy", "Exception");
-			e.printStackTrace();
-			cameraViewStatus = CameraViewStatusCodes.ERROR;
 		}
 	}
 
@@ -174,6 +155,7 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				break;
 			case DRAWING_ENDED: {
 				weaponView.clear();
+				weaponView.setZOrderMediaOverlay(true);
 				fileUri = Uri.EMPTY;
 				finalBitmap.recycle();
 				saveButton.setVisibility(View.INVISIBLE);
@@ -245,22 +227,27 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 			try {
 				Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0,
 						data.length);
-				/*
-				 * int fotoBitmapWidth = fotoBitmap.getWidth(); int
-				 * fotoBitmapHeight = fotoBitmap.getHeight(); File tmpFile = new
-				 * File(getExternalCacheDir().getPath()+"tmpImage.dat");
-				 * tmpFile.getParentFile().mkdirs(); RandomAccessFile
-				 * randomAccessFile = new RandomAccessFile(tmpFile, "rw");
-				 * FileChannel fileChannel = randomAccessFile.getChannel();
-				 * MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0,
-				 * fotoBitmapWidth*fotoBitmapHeight*4);
-				 * fotoBitmap.copyPixelsToBuffer(map); fotoBitmap.recycle();
-				 * 
-				 * finalBitmap = Bitmap.createBitmap(fotoBitmapWidth,
-				 * fotoBitmapHeight, Config.ARGB_8888); map.position(0);
-				 * finalBitmap.copyPixelsFromBuffer(map); fileChannel.close();
-				 * randomAccessFile.close();
-				 */
+
+				/*int fotoBitmapWidth = fotoBitmap.getWidth();
+				int fotoBitmapHeight = fotoBitmap.getHeight();
+				File tmpFile = new File(getExternalCacheDir().getPath()
+						+ "tmpImage.dat");
+				tmpFile.getParentFile().mkdirs();
+				RandomAccessFile randomAccessFile = new RandomAccessFile(
+						tmpFile, "rw");
+				FileChannel fileChannel = randomAccessFile.getChannel();
+				MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0,
+						fotoBitmapWidth * fotoBitmapHeight * 4);
+				fotoBitmap.copyPixelsToBuffer(map);
+				fotoBitmap.recycle();
+
+				finalBitmap = Bitmap.createBitmap(fotoBitmapWidth,
+						fotoBitmapHeight, Config.ARGB_8888);
+				map.position(0);
+				finalBitmap.copyPixelsFromBuffer(map);
+				fileChannel.close();
+				randomAccessFile.close();*/
+
 				if (!fotoBitmap.isMutable()) {
 					finalBitmap = Bitmap.createScaledBitmap(fotoBitmap,
 							PHOTO_WIDTH, PHOTO_HEIGHT, false);
@@ -270,6 +257,19 @@ public class Main extends Activity implements SurfaceHolder.Callback,
 				Canvas finalCanvas = new Canvas(finalBitmap);
 				weaponView.getFinalBitmap(finalCanvas);
 				finalCanvas.save();
+
+				/*
+				 * File tmpFile = new File(getExternalCacheDir().getPath() +
+				 * "/tmpImage.jpg"); tmpFile.getParentFile().mkdirs();
+				 * FileOutputStream fos = new FileOutputStream(tmpFile);
+				 * finalBitmap.compress(CompressFormat.JPEG, 100, fos);
+				 * fos.flush(); fos.close();
+				 * 
+				 * Intent intent = new Intent();
+				 * intent.setClass(getApplicationContext(), Share.class);
+				 * intent.putExtra("finalImagePath", tmpFile.getPath());
+				 * startActivity(intent);
+				 */
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
