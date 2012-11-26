@@ -28,7 +28,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class Main extends Activity implements SurfaceHolder.Callback {
@@ -305,7 +304,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			cam = Camera.open();
 		} catch (Exception e) {
 			Log.e("Openin camera", e.getMessage());
-			Toast.makeText(getApplicationContext(), "Error opening camera. May be it unavailible or doesn't exist", Toast.LENGTH_LONG);
+			Toast.makeText(getApplicationContext(), "Error opening camera. May be it unavailible or doesn't exist", Toast.LENGTH_LONG).show();
 			finish();			
 		}
 		return cam;
