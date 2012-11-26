@@ -4,6 +4,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+<<<<<<< HEAD
+=======
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
+import java.text.Format;
+>>>>>>> master
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -50,6 +58,11 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.WAITING;
 
+<<<<<<< HEAD
+=======
+	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.ERROR;
+
+>>>>>>> master
 	private enum CameraViewStatusCodes {
 		ERROR, WAITING, AUTOFOCUSING, DRAWING, DRAWING_ENDED
 	};
@@ -68,16 +81,46 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		weaponHolder = weaponView.getHolder();
 		weaponHolder.addCallback(weaponView);
 		weaponHolder.setFormat(PixelFormat.TRANSLUCENT);
+<<<<<<< HEAD
 		weaponView.setZOrderMediaOverlay(true);
 
+=======
+		weaponView.setZOrderOnTop(true);
+		// weaponView.setGif(R.drawable.apple);
+>>>>>>> master
 		throwButton = (Button) findViewById(R.id.throwButton);
 		throwButton.setOnClickListener(myBtnOnClickListener);
 		saveButton = (Button) findViewById(R.id.saveButton);
 		saveButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
 		shareButton = (Button) findViewById(R.id.shareButton);
 		shareButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
+<<<<<<< HEAD
 
 		Log.d("watch", "onCreate");
+=======
+		weaponHolder.addCallback(weaponView);
+		Log.d("watch", "onCreate");
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		camera.setPreviewCallback(null);
+		camera.stopPreview();
+		camera.release();
+		camera = null;
+		Log.d("watch", "onPause");
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		camera = Camera.open();
+		if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
+			surfaceCreated(cameraHolder);
+		}
+		Log.d("watch", "onResume");
+>>>>>>> master
 	}
 
 	@Override
@@ -89,7 +132,16 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		camera.release();
 		Log.d("watch", "onPause");
 	}
+<<<<<<< HEAD
 
+=======
+
+	@Override
+	public void onPreviewFrame(byte[] data, Camera camera) {
+
+	}
+
+>>>>>>> master
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -112,11 +164,34 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
+<<<<<<< HEAD
 		setCameraParameters(camera);
 		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
 			camera.startPreview();
 		}
 		Log.d("watch", "SurfaceCreated");
+=======
+		Log.d("watch", "SurfaceCreated");
+
+		try {
+			Camera.Parameters parameters = camera.getParameters();
+			parameters.setPictureFormat(ImageFormat.JPEG);
+			parameters.setRotation(90);
+			camera.setParameters(parameters);
+			camera.setDisplayOrientation(90);
+			camera.setPreviewCallback(this);
+			camera.setPreviewDisplay(cameraHolder);
+
+			if (cameraViewStatus != CameraViewStatusCodes.DRAWING_ENDED) {
+				camera.startPreview();
+				cameraViewStatus = CameraViewStatusCodes.WAITING;
+			}
+		} catch (IOException e) {
+			Log.d("Throwy", "Exception");
+			e.printStackTrace();
+			cameraViewStatus = CameraViewStatusCodes.ERROR;
+		}
+>>>>>>> master
 	}
 
 	OnClickListener myBtnOnClickListener = new OnClickListener() {
@@ -204,6 +279,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			try {
 				Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0,
 						data.length);
+<<<<<<< HEAD
 
 				/*
 				 * int fotoBitmapWidth = fotoBitmap.getWidth(); int
@@ -214,6 +290,17 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				 * FileChannel fileChannel = randomAccessFile.getChannel();
 				 * MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0,
 				 * fotoBitmapWidth * fotoBitmapHeight * 4);
+=======
+				/*
+				 * int fotoBitmapWidth = fotoBitmap.getWidth(); int
+				 * fotoBitmapHeight = fotoBitmap.getHeight(); File tmpFile = new
+				 * File(getExternalCacheDir().getPath()+"tmpImage.dat");
+				 * tmpFile.getParentFile().mkdirs(); RandomAccessFile
+				 * randomAccessFile = new RandomAccessFile(tmpFile, "rw");
+				 * FileChannel fileChannel = randomAccessFile.getChannel();
+				 * MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0,
+				 * fotoBitmapWidth*fotoBitmapHeight*4);
+>>>>>>> master
 				 * fotoBitmap.copyPixelsToBuffer(map); fotoBitmap.recycle();
 				 * 
 				 * finalBitmap = Bitmap.createBitmap(fotoBitmapWidth,
@@ -221,7 +308,10 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				 * finalBitmap.copyPixelsFromBuffer(map); fileChannel.close();
 				 * randomAccessFile.close();
 				 */
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 				if (!fotoBitmap.isMutable()) {
 					finalBitmap = Bitmap.createScaledBitmap(fotoBitmap,
 							PHOTO_WIDTH, PHOTO_HEIGHT, false);
@@ -283,7 +373,11 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				Toast.makeText(getApplicationContext(),
 						"Error creating file. Sorry :(", Toast.LENGTH_LONG)
 						.show();
+<<<<<<< HEAD
 			} catch (Exception e) {
+=======
+			} catch (IOException e) {
+>>>>>>> master
 				e.printStackTrace();
 				Toast.makeText(getApplicationContext(),
 						"Error writing file. Sorry :(", Toast.LENGTH_LONG)
@@ -297,6 +391,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 		return uri;
 	}
+<<<<<<< HEAD
 	
 	private Camera getCamera(){
 		Camera cam = null;
@@ -327,5 +422,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			camera.release();
 		}
 	}
+=======
+>>>>>>> master
 
 }
