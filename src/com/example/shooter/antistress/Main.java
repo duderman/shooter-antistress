@@ -48,9 +48,10 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	public Bitmap finalBitmap;
 	public Uri fileUri = Uri.EMPTY;
 
-	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.WAITING;
+	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.STARTING;
+
 	private enum CameraViewStatusCodes {
-		ERROR, WAITING, AUTOFOCUSING, DRAWING, DRAWING_ENDED
+		ERROR, WAITING, AUTOFOCUSING, DRAWING, DRAWING_ENDED, PAUSED, STARTING
 	};
 
 	@Override
@@ -83,6 +84,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		super.onPause();
 		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
 			camera.stopPreview();
+			cameraViewStatus = CameraViewStatusCodes.PAUSED;
 		}
 		camera.release();
 		Log.d("watch", "onPause");
@@ -94,6 +96,11 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		// TODO onpause on resume causes saving and loading image
 		// (onSaveInstanceState)
 		camera = Camera.open();
+		if (cameraViewStatus == CameraViewStatusCodes.PAUSED) {
+			setCameraParameters(camera);
+			camera.startPreview();
+			cameraViewStatus = CameraViewStatusCodes.WAITING;
+		}
 		Log.d("watch", "onResume");
 	}
 
@@ -111,8 +118,9 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		setCameraParameters(camera);
-		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
+		if (cameraViewStatus == CameraViewStatusCodes.STARTING) {
 			camera.startPreview();
+			cameraViewStatus = CameraViewStatusCodes.WAITING;
 		}
 		Log.d("watch", "SurfaceCreated");
 	}
@@ -210,8 +218,9 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				 * randomAccessFile = new RandomAccessFile( tmpFile, "rw");
 				 * FileChannel fileChannel = randomAccessFile.getChannel();
 				 * MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0,
-				 * fotoBitmapWidth * fotoBitmapHeight * 4); */
-				
+				 * fotoBitmapWidth * fotoBitmapHeight * 4);
+				 */
+
 				if (!fotoBitmap.isMutable()) {
 					finalBitmap = Bitmap.createScaledBitmap(fotoBitmap,
 							PHOTO_WIDTH, PHOTO_HEIGHT, false);
@@ -287,22 +296,25 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 		return uri;
 	}
-	
-	private Camera getCamera(){
+
+	private Camera getCamera() {
 		Camera cam = null;
 		try {
 			cam = Camera.open();
 		} catch (Exception e) {
 			Log.e("Openin camera", e.getMessage());
-			Toast.makeText(getApplicationContext(), "Error opening camera. May be it unavailible or doesn't exist", Toast.LENGTH_LONG).show();
-			finish();			
+			Toast.makeText(
+					getApplicationContext(),
+					"Error opening camera. May be it unavailible or doesn't exist",
+					Toast.LENGTH_LONG).show();
+			finish();
 		}
 		return cam;
 	}
 
 	private void setCameraParameters(Camera cam) {
-		if(cam == null)
-			cam = getCamera();		
+		if (cam == null)
+			cam = getCamera();
 		Camera.Parameters parameters = cam.getParameters();
 		parameters.setPictureFormat(ImageFormat.JPEG);
 		parameters.setRotation(90);
