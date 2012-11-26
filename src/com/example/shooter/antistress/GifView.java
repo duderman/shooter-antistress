@@ -191,7 +191,8 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 		//TODO two threads for changing coordinates by FPS and frames by delay
 		playFlag = true;
 		while(playFlag){
-			Canvas c = getHolder().lockCanvas();
+			SurfaceHolder holder = this.getHolder();
+			Canvas c = holder.lockCanvas();
 			c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 			onDraw(c);
 			getHolder().unlockCanvasAndPost(c);

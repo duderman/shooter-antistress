@@ -48,9 +48,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	private Button shareButton;
 	public Bitmap finalBitmap;
 	public Uri fileUri = Uri.EMPTY;
-	private RelativeLayout myLayout;
 
-	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.ERROR;
+	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.WAITING;
 
 	private enum CameraViewStatusCodes {
 		ERROR, WAITING, AUTOFOCUSING, DRAWING, DRAWING_ENDED
@@ -68,24 +67,17 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		cameraHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		weaponView = ((GifView) findViewById(R.id.throwingObjectSurfaceView));
 		weaponHolder = weaponView.getHolder();
+		weaponHolder.addCallback(weaponView);
 		weaponHolder.setFormat(PixelFormat.TRANSLUCENT);
 		weaponView.setZOrderMediaOverlay(true);
+
 		throwButton = (Button) findViewById(R.id.throwButton);
 		throwButton.setOnClickListener(myBtnOnClickListener);
 		saveButton = (Button) findViewById(R.id.saveButton);
 		saveButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
 		shareButton = (Button) findViewById(R.id.shareButton);
 		shareButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
-		weaponHolder.addCallback(weaponView);
-		myLayout = (RelativeLayout) getLayoutInflater().inflate(R.layout.main,
-				null, false);
-		camera = Camera.open();
-		Camera.Parameters parameters = camera.getParameters();
-		parameters.setPictureFormat(ImageFormat.JPEG);
-		parameters.setRotation(90);
-		camera.setParameters(parameters);
-		camera.setDisplayOrientation(90);
-		cameraViewStatus = CameraViewStatusCodes.WAITING;
+
 		Log.d("watch", "onCreate");
 	}
 
@@ -95,6 +87,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
 			camera.stopPreview();
 		}
+		camera.release();
 		Log.d("watch", "onPause");
 	}
 
@@ -103,17 +96,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		super.onResume();
 		// TODO onpause on resume causes saving and loading image
 		// (onSaveInstanceState)
-		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
-			camera.startPreview();
-		}
+		camera = Camera.open();
 		Log.d("watch", "onResume");
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		camera.release();
-		Log.d("watch", "onStop");
 	}
 
 	@Override
@@ -129,17 +113,11 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		Log.d("watch", "SurfaceCreated");
+		setCameraParameters(camera);
 		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
-			try {
-				camera.setPreviewDisplay(cameraHolder);
-				camera.startPreview();
-			} catch (IOException e) {
-				e.printStackTrace();
-				cameraViewStatus = CameraViewStatusCodes.ERROR;
-				camera.release();
-			}
+			camera.startPreview();
 		}
+		Log.d("watch", "SurfaceCreated");
 	}
 
 	OnClickListener myBtnOnClickListener = new OnClickListener() {
@@ -155,7 +133,6 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				break;
 			case DRAWING_ENDED: {
 				weaponView.clear();
-				weaponView.setZOrderMediaOverlay(true);
 				fileUri = Uri.EMPTY;
 				finalBitmap.recycle();
 				saveButton.setVisibility(View.INVISIBLE);
@@ -163,6 +140,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				throwButton.setText(getString(R.string.throw_button_caption));
 
 				cameraViewStatus = CameraViewStatusCodes.WAITING;
+				setCameraParameters(camera);
 				camera.startPreview();
 			}
 				break;
@@ -228,25 +206,22 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0,
 						data.length);
 
-				/*int fotoBitmapWidth = fotoBitmap.getWidth();
-				int fotoBitmapHeight = fotoBitmap.getHeight();
-				File tmpFile = new File(getExternalCacheDir().getPath()
-						+ "tmpImage.dat");
-				tmpFile.getParentFile().mkdirs();
-				RandomAccessFile randomAccessFile = new RandomAccessFile(
-						tmpFile, "rw");
-				FileChannel fileChannel = randomAccessFile.getChannel();
-				MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0,
-						fotoBitmapWidth * fotoBitmapHeight * 4);
-				fotoBitmap.copyPixelsToBuffer(map);
-				fotoBitmap.recycle();
-
-				finalBitmap = Bitmap.createBitmap(fotoBitmapWidth,
-						fotoBitmapHeight, Config.ARGB_8888);
-				map.position(0);
-				finalBitmap.copyPixelsFromBuffer(map);
-				fileChannel.close();
-				randomAccessFile.close();*/
+				/*
+				 * int fotoBitmapWidth = fotoBitmap.getWidth(); int
+				 * fotoBitmapHeight = fotoBitmap.getHeight(); File tmpFile = new
+				 * File(getExternalCacheDir().getPath() + "tmpImage.dat");
+				 * tmpFile.getParentFile().mkdirs(); RandomAccessFile
+				 * randomAccessFile = new RandomAccessFile( tmpFile, "rw");
+				 * FileChannel fileChannel = randomAccessFile.getChannel();
+				 * MappedByteBuffer map = fileChannel.map(MapMode.READ_WRITE, 0,
+				 * fotoBitmapWidth * fotoBitmapHeight * 4);
+				 * fotoBitmap.copyPixelsToBuffer(map); fotoBitmap.recycle();
+				 * 
+				 * finalBitmap = Bitmap.createBitmap(fotoBitmapWidth,
+				 * fotoBitmapHeight, Config.ARGB_8888); map.position(0);
+				 * finalBitmap.copyPixelsFromBuffer(map); fileChannel.close();
+				 * randomAccessFile.close();
+				 */
 
 				if (!fotoBitmap.isMutable()) {
 					finalBitmap = Bitmap.createScaledBitmap(fotoBitmap,
@@ -322,6 +297,36 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		}
 
 		return uri;
+	}
+	
+	private Camera getCamera(){
+		Camera cam = null;
+		try {
+			cam = Camera.open();
+		} catch (Exception e) {
+			Log.e("Openin camera", e.getMessage());
+			Toast.makeText(getApplicationContext(), "Error opening camera. May be it unavailible or doesn't exist", Toast.LENGTH_LONG);
+			finish();			
+		}
+		return cam;
+	}
+
+	private void setCameraParameters(Camera cam) {
+		if(cam == null)
+			cam = getCamera();		
+		Camera.Parameters parameters = cam.getParameters();
+		parameters.setPictureFormat(ImageFormat.JPEG);
+		parameters.setRotation(90);
+		cam.setParameters(parameters);
+		cam.setDisplayOrientation(90);
+
+		try {
+			camera.setPreviewDisplay(cameraHolder);
+		} catch (IOException e) {
+			e.printStackTrace();
+			cameraViewStatus = CameraViewStatusCodes.ERROR;
+			camera.release();
+		}
 	}
 
 }
