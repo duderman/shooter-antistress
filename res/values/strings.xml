@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Shooter Antistress</string>
@@ -11,5 +12,7 @@
     <string name="share_button_caption">Share</string>
     <string name="title_share_camera">Share this with...</string>
     <string name="throw_button_back_caption">Back</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_share">Share</string>
 
 </resources>

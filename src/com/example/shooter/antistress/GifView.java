@@ -12,8 +12,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.widget.LinearLayout.LayoutParams;
 
 public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -190,9 +188,11 @@ public class GifView extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	public void play() {
+		//TODO two threads for changing coordinates by FPS and frames by delay
 		playFlag = true;
 		while(playFlag){
-			Canvas c = getHolder().lockCanvas();
+			SurfaceHolder holder = this.getHolder();
+			Canvas c = holder.lockCanvas();
 			c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 			onDraw(c);
 			getHolder().unlockCanvasAndPost(c);
