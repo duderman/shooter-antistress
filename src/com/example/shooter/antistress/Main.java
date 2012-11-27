@@ -14,8 +14,10 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
@@ -66,7 +68,29 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		cameraHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		weaponView = ((GifView) findViewById(R.id.throwingObjectSurfaceView));
 		weaponHolder = weaponView.getHolder();
-		weaponHolder.addCallback(weaponView);
+		weaponHolder.addCallback(new SurfaceHolder.Callback() {
+			@Override
+			public void surfaceDestroyed(SurfaceHolder holder) {
+				Log.d("watch", "SurfaceDestroyed wv");
+			}
+
+			@Override
+			public void surfaceCreated(SurfaceHolder holder) {
+				Log.d("watch", "SurfaceCreated wv");
+				if(cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED){
+					Canvas c = holder.lockCanvas();
+					c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+					c.drawBitmap(finalBitmap, 0, 0, null);
+					holder.unlockCanvasAndPost(c);
+				}
+			}
+
+			@Override
+			public void surfaceChanged(SurfaceHolder holder, int format,
+					int width, int height) {
+				Log.d("watch", "SurfaceChanged wv");
+			}
+		});
 		weaponHolder.setFormat(PixelFormat.TRANSLUCENT);
 		weaponView.setZOrderMediaOverlay(true);
 		throwButton = (Button) findViewById(R.id.throwButton);
