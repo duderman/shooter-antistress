@@ -22,7 +22,7 @@ public class GifView extends SurfaceView {
 	public static final int DECODE_STATUS_UNDECODE = 0;
 	public static final int DECODE_STATUS_DECODING = 1;
 	public static final int DECODE_STATUS_DECODED = 2;
-	
+
 	public static final int FPS = 24;
 	public static final int LOOPS = 1;
 	private int loopedTimes = 0;
@@ -35,16 +35,17 @@ public class GifView extends SurfaceView {
 
 	private int width;
 	private int height;
-	private float minX,stepX,totalX, totalTimeGif;
+	private float minX, stepX, totalX, totalTimeGif;
 	private float x, y;
 	long lastStepTimeX, timeStepX, lastStepTimeGif;
-	
+
 	private int currFrame;
 
 	private int resId;
 
 	public boolean playFlag = false;
-	
+	Thread drawingThread = null;
+
 	public GifView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
@@ -54,7 +55,7 @@ public class GifView extends SurfaceView {
 	 */
 	public GifView(Context context) {
 		super(context);
-		
+
 	}
 
 	private InputStream getInputStream() {
@@ -90,12 +91,13 @@ public class GifView extends SurfaceView {
 		height = bitmap.getScaledHeight(bitmap.getDensity());
 		x = this.getWidth();
 		y = this.getHeight();
-		minX = (x-width)/2;
+		minX = (x - width) / 2;
 		totalX = x - minX;
-		
-		Log.d("Coordinates obtained", "("+Float.toString(x)+"; "+Float.toString(y)+")");
-		
-//		setLayoutParams(new LayoutParams(width, height));
+
+		Log.d("Coordinates obtained",
+				"(" + Float.toString(x) + "; " + Float.toString(y) + ")");
+
+		// setLayoutParams(new LayoutParams(width, height));
 	}
 
 	private void decode() {
@@ -115,8 +117,11 @@ public class GifView extends SurfaceView {
 					imageType = IMAGE_TYPE_DYNAMIC;
 				}
 				totalTimeGif = decoder.getDuration();
-				stepX = totalX/((totalTimeGif*LOOPS)/1000);
-				Log.d("Dimensions","totalTimeGif="+Float.toString(totalTimeGif)+"; stepX="+Float.toString(stepX)+"; totalX="+Float.toString(totalX));
+				stepX = totalX / ((totalTimeGif * LOOPS) / 1000);
+				Log.d("Dimensions",
+						"totalTimeGif=" + Float.toString(totalTimeGif)
+								+ "; stepX=" + Float.toString(stepX)
+								+ "; totalX=" + Float.toString(totalX));
 				decodeStatus = DECODE_STATUS_DECODED;
 			}
 		}.start();
@@ -130,37 +135,38 @@ public class GifView extends SurfaceView {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		if (decodeStatus == DECODE_STATUS_UNDECODE) { 
+		if (decodeStatus == DECODE_STATUS_UNDECODE) {
 			if (playFlag) {
 				decode();
 			}
 		} else if (decodeStatus == DECODE_STATUS_DECODING) {
-			
+
 		} else if (decodeStatus == DECODE_STATUS_DECODED) {
 			if (imageType == IMAGE_TYPE_STATIC) {
 				canvas.drawBitmap(bitmap, x, y, null);
 			} else if (imageType == IMAGE_TYPE_DYNAMIC) {
 				if (playFlag) {
 					long now = System.currentTimeMillis();
-					
+
 					if (now - lastStepTimeX >= 1000 / FPS) {
 						updateCoordinates();
 					}
-					
-					if(now-lastStepTimeGif>=decoder.getDelay(currFrame)){
+
+					if (now - lastStepTimeGif >= decoder.getDelay(currFrame)) {
 						lastStepTimeGif = now;
 						incrementFrameIndex();
 						bitmap = decoder.getFrame(currFrame);
 						Log.d("next frame", Integer.toString(currFrame));
 					}
-					
+
 					if (bitmap != null) {
 						canvas.drawBitmap(bitmap, x, y, null);
 					}
-					
-					if(x<=minX){
+
+					if (x <= minX) {
 						stop();
-						Log.d("Stopped", "because x("+Float.toString(x)+")<=minX("+Float.toString(minX)+")");
+						Log.d("Stopped", "because x(" + Float.toString(x)
+								+ ")<=minX(" + Float.toString(minX) + ")");
 					}
 				}
 			} else {
@@ -174,7 +180,7 @@ public class GifView extends SurfaceView {
 		if (currFrame >= decoder.getFrameCount()) {
 			loopedTimes++;
 			currFrame = 0;
-			if(loopedTimes>=LOOPS){
+			if (loopedTimes >= LOOPS) {
 				stop();
 			}
 		}
@@ -188,15 +194,41 @@ public class GifView extends SurfaceView {
 	}
 
 	public void play() {
-		//TODO two threads for changing coordinates by FPS and frames by delay
+		// TODO two threads for changing coordinates by FPS and frames by delay
 		playFlag = true;
-		while(playFlag){
-			SurfaceHolder holder = this.getHolder();
-			Canvas c = holder.lockCanvas();
+		// drawingThread = new Thread() {
+		// public void run() {
+		while (playFlag) {
+			// Log.d("watch", "new thread step");
+			Canvas c = null;
+			// try {
+			c = getHolder().lockCanvas();
+			// synchronized (getHolder()) {
 			c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 			onDraw(c);
-			getHolder().unlockCanvasAndPost(c);
+			// }
+			// } catch (Exception e) {
+			// e.printStackTrace();
+			// } finally {
+			// if (c != null) {
+			 getHolder().unlockCanvasAndPost(c);
+			 	try {
+					Thread.currentThread().sleep(1000/FPS);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			// try {
+			// sleep(1000 / FPS);
+			// } catch (InterruptedException e) {
+			// e.printStackTrace();
+			// }
+			// }
+			// }
+			// }
 		}
+		// };
+		// drawingThread.start();
+
 	}
 
 	public void pause() {
@@ -207,7 +239,20 @@ public class GifView extends SurfaceView {
 	public void stop() {
 		playFlag = false;
 		currFrame = 0;
-		invalidate();
+//		if (drawingThread != null) {
+//			boolean retry = true;
+//			while (retry) {
+//				try {
+//					Log.d("watch", "trying to stop thread");
+//					drawingThread.join();
+//					drawingThread.destroy();
+//					drawingThread = null;
+//					retry = false;
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 	}
 
 	public void nextFrame() {
@@ -223,32 +268,36 @@ public class GifView extends SurfaceView {
 			invalidate();
 		}
 	}
-	
-	private void updateCoordinates(){
+
+	private void updateCoordinates() {
 		// TODO: change when to create first lastStepTimeX;
-		if(lastStepTimeX == 0){
-			lastStepTimeGif = lastStepTimeX = System.currentTimeMillis();
-		}
-		long timeDiff = System.currentTimeMillis()-lastStepTimeX;
-		Log.d("timeDiff", Long.toString(timeDiff));
-		if(timeDiff >= 1000){
-			x -= stepX*(int)(timeDiff/1000);
-			Log.d("x dec by sec", Integer.toString((int)(timeDiff/1000)));
-		}
-		if ((timeDiff % 1000)/(1000/FPS) > 0){
-			x -= stepX/FPS*((timeDiff % 1000)/(1000/FPS));
-			Log.d("x dec by ms", Float.toString((stepX/FPS)*((timeDiff % 1000)/(1000/FPS))));
-		}
-		y = this.getHeight()-2*(-x+this.getWidth());
+//		if (lastStepTimeX == 0) {
+//			lastStepTimeGif = lastStepTimeX = System.currentTimeMillis();
+//		}
+//		long timeDiff = System.currentTimeMillis() - lastStepTimeX;
+//		Log.d("timeDiff", Long.toString(timeDiff));
+//		if (timeDiff >= 1000) {
+//			x -= stepX * (int) (timeDiff / 1000);
+//			Log.d("x dec by sec", Integer.toString((int) (timeDiff / 1000)));
+//		}
+//		if ((timeDiff % 1000) / (1000 / FPS) > 0) {
+//			x -= stepX / FPS * ((timeDiff % 1000) / (1000 / FPS));
+//			Log.d("x dec by ms",
+//					Float.toString((stepX / FPS)
+//							* ((timeDiff % 1000) / (1000 / FPS))));
+//		}
+		x -= stepX/FPS;
+		y = this.getHeight() - 2 * (-x + this.getWidth());
 		lastStepTimeX = System.currentTimeMillis();
-		Log.d("Coordinates", "("+Float.toString(x)+"; "+Float.toString(y)+")");
+		Log.d("Coordinates", "(" + Float.toString(x) + "; " + Float.toString(y)
+				+ ")");
 	}
-	
-	public void getFinalBitmap(Canvas c){
+
+	public void getFinalBitmap(Canvas c) {
 		c.drawBitmap(bitmap, x, y, null);
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		Canvas c = this.getHolder().lockCanvas();
 		c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 		this.getHolder().unlockCanvasAndPost(c);
