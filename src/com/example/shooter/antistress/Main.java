@@ -30,6 +30,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class Main extends Activity implements SurfaceHolder.Callback {
@@ -44,7 +45,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	private SurfaceHolder cameraHolder;
 	private SurfaceHolder weaponHolder;
 	private Camera camera;
-	private Button throwButton;
+	private ImageButton throwButton;
 	private Button saveButton;
 	private Button shareButton;
 	public Bitmap finalBitmap;
@@ -93,7 +94,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		});
 		weaponHolder.setFormat(PixelFormat.TRANSLUCENT);
 		weaponView.setZOrderMediaOverlay(true);
-		throwButton = (Button) findViewById(R.id.throwButton);
+		throwButton = (ImageButton) findViewById(R.id.shootImageButton);
 		throwButton.setOnClickListener(myBtnOnClickListener);
 		saveButton = (Button) findViewById(R.id.saveButton);
 		saveButton.setOnClickListener(mySaveAndShareBtnOnClickListener);
@@ -166,7 +167,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				finalBitmap.recycle();
 				saveButton.setVisibility(View.INVISIBLE);
 				shareButton.setVisibility(View.INVISIBLE);
-				throwButton.setText(getString(R.string.throw_button_caption));
+//				throwButton.setText(getString(R.string.throw_button_caption));
 
 				cameraViewStatus = CameraViewStatusCodes.WAITING;
 				setCameraParameters(camera);
@@ -229,7 +230,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			throwButton.setVisibility(View.VISIBLE);
 			saveButton.setVisibility(View.VISIBLE);
 			shareButton.setVisibility(View.VISIBLE);
-			throwButton.setText(getString(R.string.throw_button_back_caption));
+//			throwButton.setText(getString(R.string.throw_button_back_caption));
 
 			try {
 				Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0,
