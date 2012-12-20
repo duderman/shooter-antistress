@@ -5,120 +5,165 @@
     android:background="@drawable/menu_background"
     android:gravity="fill_vertical" >
 
-    <ImageView
-        android:id="@+id/HeaderImageView"
-        style="@style/TitleTextView"
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="80dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/menu_header"
-        android:gravity="center"
-        android:minLines="2"
-        android:src="@drawable/menu_choose_weapon" />
+        android:orientation="vertical" >
 
-    <ImageButton
-        android:id="@+id/tomatoImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/HeaderImageView"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/apple"
-        tools:ignore="ContentDescription" />
+        <ImageView
+            android:id="@+id/HeaderImageView"
+            style="@style/TitleTextView"
+            android:layout_width="fill_parent"
+            android:layout_height="80dp"
+            android:layout_weight="0.2"
+            android:background="@drawable/menu_header"
+            android:src="@drawable/menu_choose_weapon" />
 
-    <ImageButton
-        android:id="@+id/bottleImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/HeaderImageView"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="60dp"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/ic_launcher"
-        tools:ignore="ContentDescription" />
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8" >
 
-    <ImageButton
-        android:id="@+id/axeImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/tomatoImageButton"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp"
-        android:src="@drawable/ic_launcher" />
+            <TableRow
+                android:id="@+id/tableRow1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3" >
 
-    <ImageButton
-        android:id="@+id/eggImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/bottleImageButton"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="60dp"
-        android:layout_marginTop="5dp"
-        android:src="@drawable/ic_launcher" />
+                <ImageButton
+                    android:id="@+id/tomatoImageButton"
+                    style="@style/ImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="0.5"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/apple"
+                    tools:ignore="ContentDescription" />
 
-    <ImageButton
-        android:id="@+id/knifeImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/axeImageButton"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp"
-        android:src="@drawable/ic_launcher" />
+                <ImageButton
+                    android:id="@+id/bottleImageButton"
+                    style="@style/ImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="60dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="0.5"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_launcher"
+                    tools:ignore="ContentDescription" />
 
-    <ImageButton
-        android:id="@+id/hunterKnifeImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/eggImageButton"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="60dp"
-        android:layout_marginTop="5dp"
-        android:src="@drawable/ic_launcher" />
+            </TableRow>
 
-    <ImageButton
-        android:id="@+id/moreAppsImageButton"
-        android:layout_width="150dp"
-        android:layout_height="40dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:background="#00000000"
-        android:scaleType="fitXY"
-        android:src="@drawable/menu_more_apps_button" />
+            <TableRow
+                android:id="@+id/tableRow2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3" >
 
-    <ImageButton
-        android:id="@+id/exitImageButton"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="5dp"
-        android:layout_marginRight="10dp"
-        android:background="#00000000"
-        android:scaleType="fitXY"
-        android:src="@drawable/menu_exit_button" />
+                <ImageButton
+                    android:id="@+id/axeImageButton"
+                    style="@style/ImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_launcher" />
+
+                <ImageButton
+                    android:id="@+id/eggImageButton"
+                    style="@style/ImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="60dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_launcher" />
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3" >
+
+                <ImageButton
+                    android:id="@+id/knifeImageButton"
+                    style="@style/ImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_launcher" />
+
+                <ImageButton
+                    android:id="@+id/hunterKnifeImageButton"
+                    style="@style/ImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="60dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_launcher" />
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1" >
+
+                <ImageButton
+                    android:id="@+id/moreAppsImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_weight="0.5"
+                    android:background="#00000000"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/menu_more_apps_button" />
+
+                <ImageButton
+                    android:id="@+id/exitImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0.5"
+                    android:background="#00000000"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/menu_exit_button" />
+
+            </TableRow>
+
+        </TableLayout>
+    </LinearLayout>
 
 </RelativeLayout>

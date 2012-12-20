@@ -13,6 +13,8 @@
     <style name="TitleTextView" parent="MenuTextView">
         <item name="android:paddingLeft">20dp</item>
         <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingTop">10dp</item>
         <item name="android:textSize">24sp</item>
     </style>
     
