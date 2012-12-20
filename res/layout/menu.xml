@@ -18,31 +18,16 @@
         android:src="@drawable/menu_choose_weapon" />
 
     <ImageButton
-        android:id="@+id/EggImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_margin="20dp"
-        android:src="@drawable/ic_launcher" />
-
-    <ImageButton
-        android:id="@+id/axeImageButton"
-        style="@style/ImageButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignLeft="@+id/EggImageButton"
-        android:layout_below="@+id/EggImageButton"
-        android:layout_margin="20dp"
-        android:src="@drawable/ic_launcher" />
-
-    <ImageButton
         android:id="@+id/tomatoImageButton"
         style="@style/ImageButton"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_alignRight="@+id/imageButton2"
-        android:layout_below="@+id/imageButton1"
-        android:layout_margin="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/HeaderImageView"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/apple"
         tools:ignore="ContentDescription" />
 
@@ -51,36 +36,52 @@
         style="@style/ImageButton"
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/HeaderImageView"
-        android:layout_margin="20dp"
-        android:layout_toRightOf="@+id/imageButton2"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/ic_launcher"
         tools:ignore="ContentDescription" />
 
     <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/menu_exit_button" />
+        android:id="@+id/axeImageButton"
+        style="@style/ImageButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/tomatoImageButton"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/ic_launcher" />
 
     <ImageButton
-        android:id="@+id/imageButton1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:src="@drawable/menu_more_apps_button" />
+        android:id="@+id/eggImageButton"
+        style="@style/ImageButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/bottleImageButton"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/ic_launcher" />
 
     <ImageButton
         android:id="@+id/knifeImageButton"
         style="@style/ImageButton"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_alignRight="@+id/imageButton1"
-        android:layout_alignTop="@+id/axeImageButton"
-        android:layout_margin="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/axeImageButton"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
         android:src="@drawable/ic_launcher" />
 
     <ImageButton
@@ -88,9 +89,36 @@
         style="@style/ImageButton"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_below="@+id/HeaderImageView"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/eggImageButton"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="5dp"
         android:src="@drawable/ic_launcher" />
+
+    <ImageButton
+        android:id="@+id/moreAppsImageButton"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="#00000000"
+        android:scaleType="fitXY"
+        android:src="@drawable/menu_more_apps_button" />
+
+    <ImageButton
+        android:id="@+id/exitImageButton"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+        android:background="#00000000"
+        android:scaleType="fitXY"
+        android:src="@drawable/menu_exit_button" />
 
 </RelativeLayout>
