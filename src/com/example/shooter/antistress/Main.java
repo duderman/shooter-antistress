@@ -227,9 +227,9 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			cameraViewStatus = CameraViewStatusCodes.DRAWING;
 			Throw();
 			cameraViewStatus = CameraViewStatusCodes.DRAWING_ENDED;
-			throwButton.setVisibility(View.VISIBLE);
-			saveButton.setVisibility(View.VISIBLE);
-			shareButton.setVisibility(View.VISIBLE);
+//			throwButton.setVisibility(View.VISIBLE);
+//			saveButton.setVisibility(View.VISIBLE);
+//			shareButton.setVisibility(View.VISIBLE);
 //			throwButton.setText(getString(R.string.throw_button_back_caption));
 
 			try {
@@ -270,6 +270,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				 */
 			} catch (Exception e) {
 				e.printStackTrace();
+				// TODO: error message on saving fault
 			}
 
 		}

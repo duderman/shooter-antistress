@@ -50,7 +50,7 @@
         android:layout_alignParentLeft="true"
         android:scaleType="fitXY"
         android:layout_marginBottom="10dp"
-        android:src="@drawable/main_footer_back" />
+        android:src="@drawable/footer" />
 
     <ImageView
         android:id="@+id/footerImageView"
