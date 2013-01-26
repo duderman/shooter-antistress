@@ -1,169 +1,149 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/menu_background"
-    android:gravity="fill_vertical" >
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical" >
+    android:gravity="fill_vertical"
+    android:orientation="vertical" >
 
         <ImageView
             android:id="@+id/HeaderImageView"
             style="@style/TitleTextView"
             android:layout_width="fill_parent"
             android:layout_height="80dp"
-            android:layout_weight="0.2"
+            android:layout_weight="0.1"
             android:background="@drawable/menu_header"
             android:src="@drawable/menu_choose_weapon" />
 
-        <TableLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.8" >
+            android:layout_weight="0.5" >
 
-            <TableRow
-                android:id="@+id/tableRow1"
+            <ImageButton
+                android:id="@+id/tomatoImageButton"
+                style="@style/ImageButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3" >
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="0.5"
+                android:scaleType="fitCenter"
+                android:src="@drawable/menu_tomato"
+                tools:ignore="ContentDescription" />
 
-                <ImageButton
-                    android:id="@+id/tomatoImageButton"
-                    style="@style/ImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="60dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="0.5"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/apple"
-                    tools:ignore="ContentDescription" />
-
-                <ImageButton
-                    android:id="@+id/bottleImageButton"
-                    style="@style/ImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="60dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="0.5"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_launcher"
-                    tools:ignore="ContentDescription" />
-
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/tableRow2"
+            <ImageButton
+                android:id="@+id/bottleImageButton"
+                style="@style/ImageButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3" >
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="0.5"
+                android:scaleType="fitCenter"
+                android:src="@drawable/menu_bottle"
+                tools:ignore="ContentDescription" />
 
-                <ImageButton
-                    android:id="@+id/axeImageButton"
-                    style="@style/ImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="60dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="0.5"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_launcher" />
+        </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/eggImageButton"
-                    style="@style/ImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="60dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="0.5"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_launcher" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5" >
 
-            </TableRow>
+            <ImageButton
+                android:id="@+id/axeImageButton"
+                style="@style/ImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="0.5"
+                android:scaleType="fitCenter"
+                android:src="@drawable/menu_axe" />
 
-            <TableRow
-                android:id="@+id/tableRow3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3" >
+            <ImageButton
+                android:id="@+id/eggImageButton"
+                style="@style/ImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="0.5"
+                android:scaleType="centerInside"
+                android:src="@drawable/menu_egg" />
 
-                <ImageButton
-                    android:id="@+id/knifeImageButton"
-                    style="@style/ImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="60dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="0.5"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_launcher" />
+        </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/hunterKnifeImageButton"
-                    style="@style/ImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="60dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="0.5"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_launcher" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5" >
 
-            </TableRow>
+            <ImageButton
+                android:id="@+id/knifeImageButton"
+                style="@style/ImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="0.5"
+                android:scaleType="fitCenter"
+                android:src="@drawable/menu_knife" />
 
-            <TableRow
-                android:id="@+id/tableRow4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.1" >
+            <ImageButton
+                android:id="@+id/hunterKnifeImageButton"
+                style="@style/ImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="0.5"
+                android:scaleType="fitCenter"
+                android:src="@drawable/menu_hunter_knife" />
 
-                <ImageButton
-                    android:id="@+id/moreAppsImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_weight="0.5"
-                    android:background="#00000000"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/menu_more_apps_button" />
+        </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/exitImageButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_weight="0.5"
-                    android:background="#00000000"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/menu_exit_button" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2" >
 
-            </TableRow>
+            <ImageButton
+                android:id="@+id/moreAppsImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="0.5"
+                android:background="#00000000"
+                android:scaleType="centerInside"
+                android:src="@drawable/menu_more_apps_button" />
 
-        </TableLayout>
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/exitImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:layout_weight="0.5"
+                android:background="#00000000"
+                android:scaleType="centerInside"
+                android:src="@drawable/menu_exit_button" />
+        </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
