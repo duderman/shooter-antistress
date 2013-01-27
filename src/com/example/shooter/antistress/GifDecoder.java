@@ -1,7 +1,7 @@
 /*
  * Apache License v2.0
  * Created By Tomoki Yamashita
-*/
+ */
 
 package com.example.shooter.antistress;
 
@@ -30,6 +30,8 @@ public class GifDecoder {
 	protected int status;
 	protected int width; // full image width
 	protected int height; // full image height
+	protected int finalWidth;
+	protected int finalHeight;
 	protected boolean gctFlag; // global color table used
 	protected int gctSize; // size of global color table
 	protected int loopCount = 1; // iterations; 0 = repeat forever
@@ -48,8 +50,10 @@ public class GifDecoder {
 	protected Bitmap image; // current frame
 	protected Bitmap lastBitmap; // previous frame
 	protected byte[] block = new byte[256]; // current data block
-	protected int blockSize = 0; // block size last graphic control extension info
-	protected int dispose = 0; // 0=no action; 1=leave in place; 2=restore to bg; 3=restore to prev
+	protected int blockSize = 0; // block size last graphic control extension
+									// info
+	protected int dispose = 0; // 0=no action; 1=leave in place; 2=restore to
+								// bg; 3=restore to prev
 	protected int lastDispose = 0;
 	protected boolean transparency = false; // use transparent color
 	protected int delay = 0; // delay in milliseconds
@@ -71,13 +75,18 @@ public class GifDecoder {
 
 		public Bitmap image;
 		public int delay;
+
+		public void clearFrame() {
+			image.recycle();
+			delay = 0;
+		}
 	}
 
 	/**
 	 * Gets display duration for specified frame.
 	 * 
 	 * @param n
-	 *          int index of frame
+	 *            int index of frame
 	 * @return delay in milliseconds
 	 */
 	public int getDelay(int n) {
@@ -87,11 +96,11 @@ public class GifDecoder {
 		}
 		return delay;
 	}
-	
-	public int getDuration(){
+
+	public int getDuration() {
 		duration = 0;
-		for(int i = 0; i < frameCount; i++){
-			duration+=frames.elementAt(i).delay;
+		for (int i = 0; i < frameCount; i++) {
+			duration += frames.elementAt(i).delay;
 		}
 		return duration;
 	}
@@ -115,7 +124,8 @@ public class GifDecoder {
 	}
 
 	/**
-	 * Gets the "Netscape" iteration count, if any. A count of 0 means repeat indefinitiely.
+	 * Gets the "Netscape" iteration count, if any. A count of 0 means repeat
+	 * indefinitiely.
 	 * 
 	 * @return iteration count if one was specified, else 1.
 	 */
@@ -124,41 +134,12 @@ public class GifDecoder {
 	}
 
 	/**
-	 * Creates new frame image from current data (and previous frames as specified by their disposition codes).
+	 * Creates new frame image from current data (and previous frames as
+	 * specified by their disposition codes).
 	 */
 	protected void setPixels() {
 		// expose destination image's pixels as int array
 		int[] dest = new int[width * height];
-		// fill in starting image contents based on last image's dispose code
-		if (lastDispose > 0) {
-			if (lastDispose == 3) {
-				// use image before last
-				int n = frameCount - 2;
-				if (n > 0) {
-					lastBitmap = getFrame(n - 1);
-				} else {
-					lastBitmap = null;
-				}
-			}
-			if (lastBitmap != null) {
-				lastBitmap.getPixels(dest, 0, width, 0, 0, width, height);
-				// copy pixels
-				if (lastDispose == 2) {
-					// fill last image rect area with background color
-					int c = 0;
-					if (!transparency) {
-						c = lastBgColor;
-					}
-					for (int i = 0; i < lrh; i++) {
-						int n1 = (lry + i) * width + lrx;
-						int n2 = n1 + lrw;
-						for (int k = n1; k < n2; k++) {
-							dest[k] = c;
-						}
-					}
-				}
-			}
-		}
 		// copy each source line to the appropriate place in the destination
 		int pass = 1;
 		int inc = 8;
@@ -208,6 +189,7 @@ public class GifDecoder {
 			}
 		}
 		image = Bitmap.createBitmap(dest, width, height, Config.ARGB_4444);
+		image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, false);
 	}
 
 	/**
@@ -226,7 +208,7 @@ public class GifDecoder {
 	 * Reads GIF image from stream
 	 * 
 	 * @param is
-	 *          containing GIF file.
+	 *            containing GIF file.
 	 * @return read status code (0 = no errors)
 	 */
 	public int read(InputStream is) {
@@ -251,7 +233,8 @@ public class GifDecoder {
 	}
 
 	/**
-	 * Decodes LZW image data into pixel array. Adapted from John Cristy's BitmapMagick.
+	 * Decodes LZW image data into pixel array. Adapted from John Cristy's
+	 * BitmapMagick.
 	 */
 	protected void decodeBitmapData() {
 		int nullCode = -1;
@@ -341,7 +324,8 @@ public class GifDecoder {
 				prefix[available] = (short) old_code;
 				suffix[available] = (byte) first;
 				available++;
-				if (((available & code_mask) == 0) && (available < MAX_STACK_SIZE)) {
+				if (((available & code_mask) == 0)
+						&& (available < MAX_STACK_SIZE)) {
 					code_size++;
 					code_mask += available;
 				}
@@ -373,6 +357,23 @@ public class GifDecoder {
 		frames = new Vector<GifFrame>();
 		gct = null;
 		lct = null;
+	}
+
+	/**
+	 * Clear the frames vector
+	 */
+	public void clear() {
+		for (int i = 0; i < frameCount-1; i++) {
+			frames.elementAt(i).clearFrame();
+		}
+	}
+
+	/**
+	 * Sets final image dimensions
+	 */
+	public void setFinalDimensions(int width, int height) {
+		this.finalHeight = height;
+		this.finalWidth = width;
 	}
 
 	/**
@@ -420,7 +421,7 @@ public class GifDecoder {
 	 * Reads color table as 256 RGB integer values
 	 * 
 	 * @param ncolors
-	 *          int number of colors to read
+	 *            int number of colors to read
 	 * @return int array containing 256 colors (packed ARGB with full alpha)
 	 */
 	protected int[] readColorTable(int ncolors) {
