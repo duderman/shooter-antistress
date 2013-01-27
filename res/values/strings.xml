@@ -12,7 +12,7 @@
     <string name="share_button_caption">Share</string>
     <string name="title_share_camera">Share this with...</string>
     <string name="throw_button_back_caption">Back</string>
-    <string name="hello_world">Hello world!</string>
     <string name="title_activity_share">Share</string>
+    <string name="intent_extra_name">objectId</string>
 
 </resources>

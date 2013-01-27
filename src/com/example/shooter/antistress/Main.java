@@ -9,7 +9,9 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
@@ -39,6 +41,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.STARTING;
 
+	private int resId;
+
 	private enum CameraViewStatusCodes {
 		ERROR, WAITING, AUTOFOCUSING, DRAWING, DRAWING_ENDED, PAUSED, STARTING
 	};
@@ -49,6 +53,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.main);
 
+		resId = getIntent().getIntExtra(getString(R.string.intent_extra_name),
+				-1);
 		cameraView = (SurfaceView) findViewById(R.id.cameraSurfaceView);
 		cameraHolder = cameraView.getHolder();
 		cameraHolder.addCallback(this);
@@ -59,11 +65,13 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			@Override
 			public void surfaceDestroyed(SurfaceHolder holder) {
 				Log.d("watch", "SurfaceDestroyed wv");
+				weaponView.release();
 			}
 
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
 				Log.d("watch", "SurfaceCreated wv");
+				weaponView.setGif(resId);
 			}
 
 			@Override
@@ -120,8 +128,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		if (cameraViewStatus == CameraViewStatusCodes.STARTING) {
 			camera.startPreview();
 			cameraViewStatus = CameraViewStatusCodes.WAITING;
-		}  else if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
-			throwButton.performClick();			
+		} else if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
+			throwButton.performClick();
 		}
 		Log.d("watch", "SurfaceCreated");
 	}
@@ -173,26 +181,34 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			Throw();
 			cameraViewStatus = CameraViewStatusCodes.DRAWING_ENDED;
 
+			BitmapFactory.Options opts = new Options();
+			opts.inJustDecodeBounds = true;
+			BitmapFactory.decodeByteArray(data, 0, data.length, opts);
+			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_WIDTH,
+					PHOTO_HEIGHT);
+			opts.inJustDecodeBounds = false;
+			Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0,
+					data.length, opts);
+
+			Bitmap finalBitmap = Bitmap.createScaledBitmap(fotoBitmap, PHOTO_WIDTH, PHOTO_HEIGHT, false);
+			fotoBitmap.recycle();
+			fotoBitmap = null;
+			Canvas finalCanvas = new Canvas(finalBitmap);
+			finalCanvas.setDensity(finalBitmap.getDensity());
+			weaponView.getFinalBitmap(finalCanvas);
+			finalCanvas.save();
+			finalCanvas = null;
+
 			try {
-				Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0,
-						data.length);
-				
-				Bitmap finalBitmap = Bitmap.createScaledBitmap(fotoBitmap,
-						PHOTO_WIDTH, PHOTO_HEIGHT, true);
-				fotoBitmap.recycle();
-				
-				Canvas finalCanvas = new Canvas(finalBitmap);
-				weaponView.getFinalBitmap(finalCanvas);
-				finalCanvas.save();
-				
-				File tmpFile = new File(getExternalCacheDir().getPath()
-						+ "/image.jpg");
-				tmpFile.getParentFile().mkdirs();
+			File tmpFile = new File(getExternalCacheDir().getPath()
+					+ "/image.jpg");
+			tmpFile.getParentFile().mkdirs();
 				FileOutputStream fos = new FileOutputStream(tmpFile);
 				finalBitmap.compress(CompressFormat.JPEG, 100, fos);
 				fos.flush();
 				fos.close();
 				finalBitmap.recycle();
+				finalBitmap = null;
 
 				Intent intent = new Intent();
 				intent.setClass(getApplicationContext(), Share.class);
@@ -201,14 +217,29 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			} catch (Exception e) {
 				e.printStackTrace();
 				// TODO: error message on saving fault
-			} 
+			}
 			throwButton.setEnabled(true);
 
 		}
 	};
 
+	public static int calculateInSampleSize(BitmapFactory.Options options,
+			int reqWidth, int reqHeight) {
+		final int height = options.outHeight;
+		final int width = options.outWidth;
+		int inSampleSize = 1;
+
+		if (height > reqHeight || width > reqWidth) {
+			final int heightRatio = Math.round((float) height
+					/ (float) reqHeight);
+			final int widthRatio = Math.round((float) width / (float) reqWidth);
+			inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+		}
+
+		return inSampleSize;
+	}
+
 	private void Throw() {
-		weaponView.setGif(R.drawable.apple);
 		weaponView.play();
 	}
 
