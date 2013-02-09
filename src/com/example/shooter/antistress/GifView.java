@@ -31,6 +31,8 @@ public class GifView extends SurfaceView {
 	private int currFrame;
 	private int resId;
 
+	private Bitmap lastBitmap;
+
 	public GifView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
@@ -115,9 +117,9 @@ public class GifView extends SurfaceView {
 			@Override
 			public void run() {
 				decoder = new GifDecoder();
-					decoder.setFinalDimensions(width, height);
-					decoder.read(getInputStream());
-					decodeStatus = DECODE_STATUS_DECODED;
+				decoder.setFinalDimensions(width, height);
+				decoder.read(getInputStream());
+				decodeStatus = DECODE_STATUS_DECODED;
 			}
 		}.start();
 	}
@@ -148,13 +150,16 @@ public class GifView extends SurfaceView {
 
 	public void play() {
 		try {
-			while (decodeStatus != DECODE_STATUS_DECODED){	}
+			while (decodeStatus != DECODE_STATUS_DECODED) {
+			}
 			playFlag = true;
 			while (playFlag) {
 				Draw();
 				Thread.sleep(decoder.getDelay(currFrame));
 				incrementFrameIndex();
 			}
+			lastBitmap = decoder.getFrame(currFrame);
+			release();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -173,10 +178,8 @@ public class GifView extends SurfaceView {
 	public void getFinalBitmap(Canvas c) {
 		setResIdAndDimensions(com.example.shooter.antistress.Main.PHOTO_WIDTH,
 				com.example.shooter.antistress.Main.PHOTO_HEIGHT);
-		Bitmap currBitmap = Bitmap.createScaledBitmap(
-				decoder.getFrame(currFrame), width, height, false);
-		c.drawBitmap(currBitmap, x, y, null);
-		currBitmap.recycle();
+		c.drawBitmap(lastBitmap, x, y, null);
+		lastBitmap.recycle();
 		release();
 	}
 

@@ -203,6 +203,15 @@ public class GifDecoder {
 		n = n % frameCount;
 		return ((GifFrame) frames.elementAt(n)).image;
 	}
+	
+	public void clearFrame(int n){
+		if (frameCount <= 0)
+			return;
+		if(n==frameCount-1)
+			return;
+		n = n % frameCount;
+		frames.elementAt(n).clearFrame();
+	}
 
 	/**
 	 * Reads GIF image from stream

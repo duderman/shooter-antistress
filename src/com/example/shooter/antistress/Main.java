@@ -17,6 +17,7 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -172,12 +173,18 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			camera.takePicture(null, null, null, myPictureCallback);
 		}
 	};
+	
+	ShutterCallback myShutterCallback = new ShutterCallback() {
+		@Override
+		public void onShutter() {
+			cameraViewStatus = CameraViewStatusCodes.DRAWING;
+			Throw();
+		}
+	};
 
 	PictureCallback myPictureCallback = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
-			cameraViewStatus = CameraViewStatusCodes.DRAWING;
-			Throw();
 			cameraViewStatus = CameraViewStatusCodes.DRAWING_ENDED;
 
 			BitmapFactory.Options opts = new Options();
