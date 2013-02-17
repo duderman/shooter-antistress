@@ -23,6 +23,10 @@
                 android:id="@+id/photoFrameImageView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:paddingBottom="@dimen/photo_frame_padding"
+                android:paddingLeft="@dimen/photo_frame_padding"
+                android:paddingRight="@dimen/photo_frame_padding"
+                android:paddingTop="@dimen/photo_frame_padding"
                 android:scaleType="fitCenter"
                 android:src="@drawable/share_photo_frame" />
 
@@ -32,6 +36,12 @@
                 android:layout_height="match_parent"
                 android:layout_margin="20dp"
                 android:scaleType="centerInside" />
+            <ImageView
+                android:id="@+id/photoFrameOuterImageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/share_photo_frame_outer" />
 
         </RelativeLayout>
 
