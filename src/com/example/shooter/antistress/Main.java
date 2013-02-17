@@ -12,10 +12,11 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
-import android.graphics.ImageFormat;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
@@ -71,7 +72,10 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
 				Log.d("watch", "SurfaceCreated wv");
-				weaponView.setGif(resId);
+				if (resId != -1)
+					weaponView.setGif(resId);
+				else
+					weaponView.setGif(R.id.tomatoImageButton);
 			}
 
 			@Override
@@ -173,10 +177,11 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			camera.takePicture(null, null, null, myPictureCallback);
 		}
 	};
-	
+
 	ShutterCallback myShutterCallback = new ShutterCallback() {
 		@Override
 		public void onShutter() {
+			Log.d("camera monitoring", "shutter callback");
 			cameraViewStatus = CameraViewStatusCodes.DRAWING;
 			Throw();
 		}
@@ -185,30 +190,52 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	PictureCallback myPictureCallback = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
+			Log.d("camera monitoring", "picture taken");
+			Throw();
 			cameraViewStatus = CameraViewStatusCodes.DRAWING_ENDED;
 
 			BitmapFactory.Options opts = new Options();
 			opts.inJustDecodeBounds = true;
 			BitmapFactory.decodeByteArray(data, 0, data.length, opts);
-			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_WIDTH,
-					PHOTO_HEIGHT);
+			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_HEIGHT,
+					PHOTO_WIDTH);
 			opts.inJustDecodeBounds = false;
-			Bitmap fotoBitmap = BitmapFactory.decodeByteArray(data, 0,
+			opts.inPurgeable = true;
+			Bitmap finalBitmap = BitmapFactory.decodeByteArray(data, 0,
 					data.length, opts);
 
-			Bitmap finalBitmap = Bitmap.createScaledBitmap(fotoBitmap, PHOTO_WIDTH, PHOTO_HEIGHT, false);
-			fotoBitmap.recycle();
-			fotoBitmap = null;
-			Canvas finalCanvas = new Canvas(finalBitmap);
-			finalCanvas.setDensity(finalBitmap.getDensity());
-			weaponView.getFinalBitmap(finalCanvas);
-			finalCanvas.save();
-			finalCanvas = null;
-
+			int width = finalBitmap.getWidth();
+			int height = finalBitmap.getHeight();
+			Matrix matrix = new Matrix();
+			matrix.postRotate(90);
+			finalBitmap = Bitmap.createBitmap(finalBitmap, 0, 0, width, height,
+					matrix, false);
 			try {
-			File tmpFile = new File(getExternalCacheDir().getPath()
-					+ "/image.jpg");
-			tmpFile.getParentFile().mkdirs();
+				// File file = new File(getExternalCacheDir().getPath()+
+				// "/image.jpg");
+				// file.getParentFile().mkdirs();
+				// RandomAccessFile randomAccessFile = new
+				// RandomAccessFile(file,"rw");
+				// FileChannel channel = randomAccessFile.getChannel();
+				// MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
+				// width* height * 4);
+				// finalBitmap.copyPixelsToBuffer(map);
+				// finalBitmap.recycle();
+				// finalBitmap = Bitmap.createBitmap(width,
+				// height,Config.ARGB_8888);
+				// map.position(0);
+				// finalBitmap.copyPixelsFromBuffer(map);
+				// channel.close();
+				// randomAccessFile.close();
+
+				Canvas finalCanvas = new Canvas(finalBitmap);
+				// finalCanvas.setDensity(finalBitmap.getDensity());
+				weaponView.getFinalBitmap(finalCanvas);
+				finalCanvas.save();
+				finalCanvas = null;
+
+				File tmpFile = new File(getExternalCacheDir().getPath()
+						+ "/image.jpg");
 				FileOutputStream fos = new FileOutputStream(tmpFile);
 				finalBitmap.compress(CompressFormat.JPEG, 100, fos);
 				fos.flush();
@@ -267,13 +294,20 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	private void setCameraParameters(Camera cam) {
 		if (cam == null)
 			cam = getCamera();
-		Camera.Parameters parameters = cam.getParameters();
-		parameters.setPictureFormat(ImageFormat.JPEG);
-		parameters.setJpegQuality(100);
-		parameters.setRotation(90);
-		cam.setParameters(parameters);
 		cam.setDisplayOrientation(90);
-
+		Camera.Parameters parameters = cam.getParameters();
+		// int orientation = 90;
+		// Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+		// int rotation = 0;
+		// for(int id = 0; id<Camera.getNumberOfCameras();id++){
+		// Camera.getCameraInfo(id, info);
+		// if(info.facing == CameraInfo.CAMERA_FACING_BACK){
+		// rotation = (info.orientation + orientation);
+		// }
+		// }
+		// parameters.setRotation(rotation);
+		parameters.set("orientation", "portrait");
+		cam.setParameters(parameters);
 		try {
 			camera.setPreviewDisplay(cameraHolder);
 		} catch (IOException e) {

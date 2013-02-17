@@ -1,14 +1,16 @@
 package com.example.shooter.antistress;
 
-import java.io.InputStream;
-
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceView;
 
 public class GifView extends SurfaceView {
@@ -17,108 +19,93 @@ public class GifView extends SurfaceView {
 	public static final int DECODE_STATUS_DECODING = 1;
 	public static final int DECODE_STATUS_DECODED = 2;
 
-	public static final int FPS = 24;
-	public static final int LOOPS = 1;
+	public static final int FPS = 30;
 
 	private GifDecoder decoder;
+	
+	SoundPool sounds = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+	private int startSound;
+	private int endSound;
 
 	public int decodeStatus = DECODE_STATUS_UNDECODE;
 
-	private int width, height;
-	private float x, y;
+	private int startX, startY;
+	private int finalX, finalY;
+	private int currentX, currentY;
+	private double speed;
+	private double angle;
 
 	private boolean playFlag = false;
 	private int currFrame;
 	private int resId;
 
-	private Bitmap lastBitmap;
-
 	public GifView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
-	/**
-	 * Constructor
-	 */
 	public GifView(Context context) {
 		super(context);
 	}
 
-	private InputStream getInputStream() {
-		if (resId > 0)
-			return getContext().getResources().openRawResource(resId);
-		return null;
-	}
-
-	/**
-	 * set gif resource id
-	 * 
-	 * @param resId
-	 */
 	public void setGif(int resId) {
-		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resId);
-		setGif(resId, bitmap);
-	}
-
-	/**
-	 * set gif resource id and cache image
-	 * 
-	 * @param resId
-	 * @param cacheImage
-	 */
-	public void setGif(int resId, Bitmap cacheImage) {
 		this.resId = resId;
 		decodeStatus = DECODE_STATUS_UNDECODE;
-		setResIdAndDimensions(this.getWidth(), this.getHeight());
-		decode();
+		setDimAndDecode();
 	}
 
-	private void setResIdAndDimensions(int targetWidth, int targetHeight) {
-		width = targetWidth;
-		height = targetHeight;
-		x = y = 0;
+	private void setDimAndDecode() {
+		startX = startY = 0;
+		int columns = 1;
+		int rows = 1;
+		int duration = 1000;
+		startSound = sounds.load(getContext(), R.raw.throwing, 1);
+
 		switch (resId) {
+		default:
 		case R.id.tomatoImageButton:
-			this.resId = R.drawable.gif_tomato;
+			this.resId = R.drawable.animate_tomato;
+			endSound = sounds.load(getContext(), R.raw.tomato, 2);
+			columns = 11;
 			break;
 		case R.id.bottleImageButton:
-			this.resId = R.drawable.gif_bottle;
+			this.resId = R.drawable.animate_bottle;
+			endSound = sounds.load(getContext(), R.raw.bottle, 2);
+			columns = 11;
 			break;
 		case R.id.axeImageButton:
-			this.resId = R.drawable.gif_axe;
-			width = (int) (targetWidth * 1.3);
-			y -= (int) (targetHeight * 0.2);
+			this.resId = R.drawable.animate_axe;
+			endSound = sounds.load(getContext(), R.raw.axe, 2);
+			columns = 5;
+			duration = 300;
 			break;
 		case R.id.eggImageButton:
-			this.resId = R.drawable.gif_egg;
+			this.resId = R.drawable.animate_egg;
+			endSound = sounds.load(getContext(), R.raw.egg, 2);
+			columns = 9;
+			duration = 800;
 			break;
 		case R.id.knifeImageButton:
-			this.resId = R.drawable.gif_knife;
-			width = (int) (targetWidth * 1.1);
-			y -= (int) (targetHeight * 0.1);
+			this.resId = R.drawable.animate_knife;
+			endSound = sounds.load(getContext(), R.raw.knife, 2);
+			columns = 5;
+			duration = 300;
 			break;
 		case R.id.hunterKnifeImageButton:
-			this.resId = R.drawable.gif_hunter_knife;
-			width = (int) (targetWidth * 1.2);
-			y -= (int) (targetHeight * 0.2);
-			x += (int) (targetWidth * 0.2);
-			break;
-		default:
-			this.resId = R.drawable.gif_tomato;
+			this.resId = R.drawable.animate_hunter_knife;
+			endSound = sounds.load(getContext(), R.raw.hunter_knife, 2);
+			columns = 5;
+			duration = 300;
 			break;
 		}
-	}
 
-	private void decode() {
 		release();
 		currFrame = 0;
-
+		decoder = new GifDecoder();
+		decoder.init(this.getWidth(), this.getHeight(), duration, rows, columns);
 		new Thread() {
 			@Override
 			public void run() {
-				decoder = new GifDecoder();
-				decoder.setFinalDimensions(width, height);
-				decoder.read(getInputStream());
+				decoder.readFile(getResources(), resId);
 				decodeStatus = DECODE_STATUS_DECODED;
 			}
 		}.start();
@@ -128,42 +115,129 @@ public class GifView extends SurfaceView {
 		if (decoder != null) {
 			decoder.clear();
 			decoder = null;
-			decodeStatus = DECODE_STATUS_UNDECODE;
 		}
+		decodeStatus = DECODE_STATUS_UNDECODE;
 	}
 
 	protected void Draw() {
 		Canvas canvas = null;
 		canvas = getHolder().lockCanvas();
 		canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-		canvas.drawBitmap(decoder.getFrame(currFrame), x, y, null);
+		canvas.drawBitmap(decoder.mainBitmap, decoder.getFrame(currFrame),
+				new Rect(currentX, currentY, currentX + decoder.width, currentY
+						+ decoder.height), null);
 		getHolder().unlockCanvasAndPost(canvas);
+		Log.d("Drawed", "Canvas rendered");
 	}
 
-	private void incrementFrameIndex() {
-		currFrame++;
-		if (currFrame >= decoder.getFrameCount()) {
-			currFrame = decoder.getFrameCount() - 1;
+	private void updateCoordinates() {
+		currentX -= Math.round(speed * Math.cos(angle));
+		currentY -= Math.round(speed * Math.sin(angle));
+		Log.d("Dimensions", "currentXY = { " + currentX + " ; " + currentY
+				+ " }");
+		if (currentX <= finalX && currentY <= finalY) {
 			stop();
 		}
 	}
 
+	private void incrementFrameIndex() {
+		currFrame++;
+		if (currFrame >= decoder.getFrameCount() - 1) {
+			currFrame--;
+		}
+		Log.d("nextFrame", "" + currFrame);
+	}
+
 	public void play() {
-		try {
-			while (decodeStatus != DECODE_STATUS_DECODED) {
+		while (decodeStatus != DECODE_STATUS_DECODED) {
+		}
+		finalX = (this.getWidth() - decoder.width)/ 2;
+		finalY = this.getHeight()/3 - (decoder.height) / 2;
+		
+		switch (resId) {
+		default:
+		case R.drawable.animate_tomato:
+			this.startX = (this.getWidth()-decoder.width) / 2;
+			this.startY = this.getHeight();
+			break;
+		case R.drawable.animate_bottle:
+			this.startX = (this.getWidth()-decoder.width) / 2;
+			this.startY = this.getHeight();
+			break;
+		case R.drawable.animate_axe:
+			this.startX = (this.getWidth());
+			this.startY = this.getHeight() / 2;
+			this.finalX = this.getWidth()/2-decoder.width/3;
+			break;
+		case R.drawable.animate_egg:
+			this.startX = (this.getWidth()-decoder.width) / 2;
+			this.startY = this.getHeight();
+			break;
+		case R.drawable.animate_knife:
+			this.startX = (this.getWidth());
+			this.startY = this.getHeight() / 3;
+			break;
+		case R.drawable.animate_hunter_knife:
+			this.startX = (this.getWidth());
+			this.startY = this.getHeight() / 2;
+			this.finalX = this.getWidth()/2-decoder.width/3;
+			break;
+		}
+		this.angle = Math.atan((double) (startY - finalY) / (startX - finalX));
+		this.currentX = this.startX;
+		this.currentY = this.startY;
+		int vectX = finalX - startX;
+		int vectY = finalY - startY;
+		double vectLength = Math.sqrt(Math.pow(vectX, 2) + Math.pow(vectY, 2));
+		double durby1000 = (double)decoder.duration / (double)1000;
+		double lenbydur = vectLength / durby1000;
+		speed = Math.round(lenbydur / FPS);
+
+		Log.d("Dimensions", "startXY= { " + startX + " ; " + startY
+				+ " }; finalXY={ " + finalX + " ; " + finalY + " }; speed= "
+				+ Math.round(speed) + " angel= " + angle);
+
+		playFlag = true;
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					while (playFlag) {
+						sleep(decoder.getDelay());
+						incrementFrameIndex();
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			playFlag = true;
+		}.start();
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					while (playFlag) {
+						sleep(1000 / FPS);
+						updateCoordinates();
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}.start();
+		try {
+			sounds.play(startSound, 1.0f, 1.0f, 1, 0, 1.5f);
 			while (playFlag) {
 				Draw();
-				Thread.sleep(decoder.getDelay(currFrame));
-				incrementFrameIndex();
+				Thread.sleep(1000 / FPS);
 			}
-			lastBitmap = decoder.getFrame(currFrame);
-			release();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		currFrame = decoder.getFrameCount() - 1;
+		Draw();
+		final int result = sounds.play(endSound, 1.0f, 1.0f, 2, 0, 1.5f);
 	}
 
 	public void pause() {
@@ -176,10 +250,18 @@ public class GifView extends SurfaceView {
 	}
 
 	public void getFinalBitmap(Canvas c) {
-		setResIdAndDimensions(com.example.shooter.antistress.Main.PHOTO_WIDTH,
-				com.example.shooter.antistress.Main.PHOTO_HEIGHT);
-		c.drawBitmap(lastBitmap, x, y, null);
-		lastBitmap.recycle();
+		Rect srcRect = decoder.getFrame(decoder.getFrameCount() - 1);
+		float propX = (float) (Main.PHOTO_WIDTH) / (float) (this.getWidth());
+		float propY = (float) (Main.PHOTO_HEIGHT) / (float) (this.getHeight());
+		Matrix matrix = new Matrix();
+		matrix.postScale(propX, propY);
+		Bitmap finalBitmap = Bitmap.createBitmap(decoder.mainBitmap,
+				srcRect.left, srcRect.top, decoder.width, decoder.height,
+				matrix, false);
+		// int right = currentX+decoder.width;
+		// int bottom = currentY+decoder.height;
+		// Rect dstRect = new Rect(currentX, currentY, right, bottom);
+		c.drawBitmap(finalBitmap, currentX * propX, currentY * propY, null);
 		release();
 	}
 
