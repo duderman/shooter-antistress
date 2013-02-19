@@ -207,7 +207,15 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			int width = finalBitmap.getWidth();
 			int height = finalBitmap.getHeight();
 			Matrix matrix = new Matrix();
-			matrix.postRotate(90);
+			Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+			int rotation = 0;
+			for (int id = 0; id < Camera.getNumberOfCameras(); id++) {
+				Camera.getCameraInfo(id, info);
+				if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
+					rotation = info.orientation;
+				}
+			}
+			matrix.postRotate(rotation);
 			finalBitmap = Bitmap.createBitmap(finalBitmap, 0, 0, width, height,
 					matrix, false);
 			try {
@@ -296,16 +304,6 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			cam = getCamera();
 		cam.setDisplayOrientation(90);
 		Camera.Parameters parameters = cam.getParameters();
-		// int orientation = 90;
-		// Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-		// int rotation = 0;
-		// for(int id = 0; id<Camera.getNumberOfCameras();id++){
-		// Camera.getCameraInfo(id, info);
-		// if(info.facing == CameraInfo.CAMERA_FACING_BACK){
-		// rotation = (info.orientation + orientation);
-		// }
-		// }
-		// parameters.setRotation(rotation);
 		parameters.set("orientation", "portrait");
 		cam.setParameters(parameters);
 		try {
