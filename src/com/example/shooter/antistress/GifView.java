@@ -254,7 +254,7 @@ public class GifView extends SurfaceView {
 		float propX = (float) (c.getWidth()) / (float) (this.getWidth());
 		float propY = (float) (c.getHeight()) / (float) (this.getHeight());
 		Matrix matrix = new Matrix();
-		matrix.postScale(propX, propY);
+		matrix.preScale(propX, propY);
 		Bitmap finalBitmap = Bitmap.createBitmap(decoder.mainBitmap,
 				srcRect.left, srcRect.top, decoder.width, decoder.height,
 				matrix, false);

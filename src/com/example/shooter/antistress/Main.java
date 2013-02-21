@@ -3,6 +3,8 @@ package com.example.shooter.antistress;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -19,19 +21,22 @@ import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class Main extends Activity implements SurfaceHolder.Callback {
 
 	public static final int PHOTO_WIDTH = 480;
-	public static final int PHOTO_HEIGHT = 720;
+	public static final int PHOTO_HEIGHT = 800;
 
 	private SurfaceView cameraView;
 	private GifView weaponView;
@@ -52,6 +57,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.main);
 
 		resId = getIntent().getIntExtra(getString(R.string.intent_extra_name),
@@ -198,8 +205,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			BitmapFactory.Options opts = new Options();
 			opts.inJustDecodeBounds = true;
 			BitmapFactory.decodeByteArray(data, 0, data.length, opts);
-			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_WIDTH,
-					PHOTO_HEIGHT);
+			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_HEIGHT, PHOTO_WIDTH);
 			opts.inJustDecodeBounds = false;
 			opts.inPurgeable = true;
 			Bitmap finalBitmap = BitmapFactory.decodeByteArray(data, 0,
@@ -207,27 +213,26 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 			int width = finalBitmap.getWidth();
 			int height = finalBitmap.getHeight();
-			//Matrix matrix = new Matrix();
-			//matrix.postRotate(90);
-			//finalBitmap = Bitmap.createBitmap(finalBitmap, 0, 0, width, height,
-			//		matrix, false);
+			Matrix matrix = new Matrix();
+			matrix.postScale(PHOTO_WIDTH, PHOTO_HEIGHT);
+			finalBitmap = Bitmap.createScaledBitmap(finalBitmap, width, height, true);//(finalBitmap, 0, 0, width, height,matrix, false);
 			try {
-				File file = new File(getExternalCacheDir().getPath()+
-				"/image.jpg");
-				file.getParentFile().mkdirs();
-				RandomAccessFile randomAccessFile = new
-				RandomAccessFile(file,"rw");
-				FileChannel channel = randomAccessFile.getChannel();
-				MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
-				width* height * 4);
-				finalBitmap.copyPixelsToBuffer(map);
-				finalBitmap.recycle();
-				finalBitmap = Bitmap.createBitmap(width,
-				height,Config.ARGB_8888);
-				map.position(0);
-				finalBitmap.copyPixelsFromBuffer(map);
-				channel.close();
-				randomAccessFile.close();
+//				File file = new File(getExternalCacheDir().getPath()+
+//				"/image.jpg");
+//				file.getParentFile().mkdirs();
+//				RandomAccessFile randomAccessFile = new
+//				RandomAccessFile(file,"rw");
+//				FileChannel channel = randomAccessFile.getChannel();
+//				MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
+//				width* height * 4);
+//				finalBitmap.copyPixelsToBuffer(map);
+//				finalBitmap.recycle();
+//				finalBitmap = Bitmap.createBitmap(width,
+//				height,Config.ARGB_8888);
+//				map.position(0);
+//				finalBitmap.copyPixelsFromBuffer(map);
+//				channel.close();
+//				randomAccessFile.close();
 
 				Canvas finalCanvas = new Canvas(finalBitmap);
 				finalCanvas.setDensity(finalBitmap.getDensity());
@@ -294,27 +299,19 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	private void setCameraParameters(Camera cam) {
 		if (cam == null)
 			cam = getCamera();
-		int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-     	int degrees = 0;
-     	switch (rotation) {
-     	    case Surface.ROTATION_0: degrees = 0; break;
-     	    case Surface.ROTATION_90: degrees = 90; break;
-     	    case Surface.ROTATION_180: degrees = 180; break;
-     	    case Surface.ROTATION_270: degrees = 270; break;
-     	}
+		int degrees = 90;
 		cam.setDisplayOrientation(degrees);
 		Camera.Parameters parameters = cam.getParameters();
-		Size optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(), this.getWidth(), this.getHeight());
-		parameters.setPreviewSize(optimalSize.width, optimalSize.height);
-		optimalSize = getOptimalSize(parameters.getSupportedPictureSizes(), PHOTO_WIDTH, PHOTO_HEIGHT);
+		Size optimalSize = getOptimalSize(parameters.getSupportedPictureSizes(), PHOTO_HEIGHT, PHOTO_WIDTH); 
 		parameters.setPictureSize(optimalSize.width, optimalSize.height);
+		optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(), cameraView.getHeight(), cameraView.getWidth());
+		parameters.setPreviewSize(optimalSize.width, optimalSize.height);
 		Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-		degrees = (degrees + 45) / 90 * 90;
 		int rotation = 0;
 		for(int id = 0; id<Camera.getNumberOfCameras();id++){
 			Camera.getCameraInfo(id, info);
 			if(info.facing == CameraInfo.CAMERA_FACING_BACK){
-				rotation = (info.orientation + degrees) % 360;
+				rotation = info.orientation;
 			}
 		}
 		parameters.setRotation(rotation);
@@ -336,11 +333,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	  for (Iterator<Size> iterator = sizes.iterator(); iterator.hasNext();) {
 	    Size currSize =  iterator.next();
 	    double curAspectRatio = ((double)currSize.width)/currSize.height;
-	    //do the aspect ratios equal?
 	    if ( Math.abs( aspectRatio - curAspectRatio ) < epsilon ) {
-	      //they do
 	      if(optimalSize!=null) {
-	        //is the current size higher than the one before
 	        if(optimalSize.height<currSize.height && optimalSize.width<currSize.width) {
 	          optimalSize = currSize;
 	        }
@@ -350,21 +344,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	    }
 	  }
 	  if(optimalSize == null) {
-	    //did not find a size with the correct aspect ratio.. let's choose the smallest instead
-	    for (Iterator<Size> iterator = sizes.iterator(); iterator.hasNext();) {
-	      Size currSize =  iterator.next();
-	      if(optimalSize!=null) {
-	        //is the current size smaller than the one before
-	        if(optimalSize.height>currSize.height && optimalSize.width>currSize.width) {
-	          optimalSize = currSize;
-	        } else {
-	          optimalSize = currSize;
-	        }
-	      }else {
-	        optimalSize = currSize;
-	      }
-	      
-	    }
+		  optimalSize = sizes.get(0);
 	  }
 	  return optimalSize;
 	}
