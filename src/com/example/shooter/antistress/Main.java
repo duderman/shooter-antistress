@@ -129,6 +129,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		setCameraParameters(camera);
+		throwButton.setEnabled(true);
 		if (cameraViewStatus == CameraViewStatusCodes.STARTING) {
 			camera.startPreview();
 			cameraViewStatus = CameraViewStatusCodes.WAITING;
@@ -197,8 +198,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			BitmapFactory.Options opts = new Options();
 			opts.inJustDecodeBounds = true;
 			BitmapFactory.decodeByteArray(data, 0, data.length, opts);
-			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_HEIGHT,
-					PHOTO_WIDTH);
+			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_WIDTH,
+					PHOTO_HEIGHT);
 			opts.inJustDecodeBounds = false;
 			opts.inPurgeable = true;
 			Bitmap finalBitmap = BitmapFactory.decodeByteArray(data, 0,
@@ -206,38 +207,30 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 			int width = finalBitmap.getWidth();
 			int height = finalBitmap.getHeight();
-			Matrix matrix = new Matrix();
-			Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-			int rotation = 0;
-			for (int id = 0; id < Camera.getNumberOfCameras(); id++) {
-				Camera.getCameraInfo(id, info);
-				if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
-					rotation = info.orientation;
-				}
-			}
-			matrix.postRotate(rotation);
-			finalBitmap = Bitmap.createBitmap(finalBitmap, 0, 0, width, height,
-					matrix, false);
+			//Matrix matrix = new Matrix();
+			//matrix.postRotate(90);
+			//finalBitmap = Bitmap.createBitmap(finalBitmap, 0, 0, width, height,
+			//		matrix, false);
 			try {
-				// File file = new File(getExternalCacheDir().getPath()+
-				// "/image.jpg");
-				// file.getParentFile().mkdirs();
-				// RandomAccessFile randomAccessFile = new
-				// RandomAccessFile(file,"rw");
-				// FileChannel channel = randomAccessFile.getChannel();
-				// MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
-				// width* height * 4);
-				// finalBitmap.copyPixelsToBuffer(map);
-				// finalBitmap.recycle();
-				// finalBitmap = Bitmap.createBitmap(width,
-				// height,Config.ARGB_8888);
-				// map.position(0);
-				// finalBitmap.copyPixelsFromBuffer(map);
-				// channel.close();
-				// randomAccessFile.close();
+				File file = new File(getExternalCacheDir().getPath()+
+				"/image.jpg");
+				file.getParentFile().mkdirs();
+				RandomAccessFile randomAccessFile = new
+				RandomAccessFile(file,"rw");
+				FileChannel channel = randomAccessFile.getChannel();
+				MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
+				width* height * 4);
+				finalBitmap.copyPixelsToBuffer(map);
+				finalBitmap.recycle();
+				finalBitmap = Bitmap.createBitmap(width,
+				height,Config.ARGB_8888);
+				map.position(0);
+				finalBitmap.copyPixelsFromBuffer(map);
+				channel.close();
+				randomAccessFile.close();
 
 				Canvas finalCanvas = new Canvas(finalBitmap);
-				// finalCanvas.setDensity(finalBitmap.getDensity());
+				finalCanvas.setDensity(finalBitmap.getDensity());
 				weaponView.getFinalBitmap(finalCanvas);
 				finalCanvas.save();
 				finalCanvas = null;
@@ -259,7 +252,6 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				e.printStackTrace();
 				// TODO: error message on saving fault
 			}
-			throwButton.setEnabled(true);
 
 		}
 	};
@@ -302,8 +294,30 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	private void setCameraParameters(Camera cam) {
 		if (cam == null)
 			cam = getCamera();
-		cam.setDisplayOrientation(90);
+		int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+     	int degrees = 0;
+     	switch (rotation) {
+     	    case Surface.ROTATION_0: degrees = 0; break;
+     	    case Surface.ROTATION_90: degrees = 90; break;
+     	    case Surface.ROTATION_180: degrees = 180; break;
+     	    case Surface.ROTATION_270: degrees = 270; break;
+     	}
+		cam.setDisplayOrientation(degrees);
 		Camera.Parameters parameters = cam.getParameters();
+		Size optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(), this.getWidth(), this.getHeight());
+		parameters.setPreviewSize(optimalSize.width, optimalSize.height);
+		optimalSize = getOptimalSize(parameters.getSupportedPictureSizes(), PHOTO_WIDTH, PHOTO_HEIGHT);
+		parameters.setPictureSize(optimalSize.width, optimalSize.height);
+		Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+		degrees = (degrees + 45) / 90 * 90;
+		int rotation = 0;
+		for(int id = 0; id<Camera.getNumberOfCameras();id++){
+			Camera.getCameraInfo(id, info);
+			if(info.facing == CameraInfo.CAMERA_FACING_BACK){
+				rotation = (info.orientation + degrees) % 360;
+			}
+		}
+		parameters.setRotation(rotation);
 		parameters.set("orientation", "portrait");
 		cam.setParameters(parameters);
 		try {
@@ -313,6 +327,46 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			cameraViewStatus = CameraViewStatusCodes.ERROR;
 			camera.release();
 		}
+	}
+
+	public static Size getOptimalSize(List<Size> sizes, int screenWidth, int screenHeight) {
+		final double epsilon = 0.17;
+	  double aspectRatio = ((double)screenWidth)/screenHeight;
+	  Size optimalSize = null;
+	  for (Iterator<Size> iterator = sizes.iterator(); iterator.hasNext();) {
+	    Size currSize =  iterator.next();
+	    double curAspectRatio = ((double)currSize.width)/currSize.height;
+	    //do the aspect ratios equal?
+	    if ( Math.abs( aspectRatio - curAspectRatio ) < epsilon ) {
+	      //they do
+	      if(optimalSize!=null) {
+	        //is the current size higher than the one before
+	        if(optimalSize.height<currSize.height && optimalSize.width<currSize.width) {
+	          optimalSize = currSize;
+	        }
+	      } else {
+	        optimalSize = currSize;
+	      }
+	    }
+	  }
+	  if(optimalSize == null) {
+	    //did not find a size with the correct aspect ratio.. let's choose the smallest instead
+	    for (Iterator<Size> iterator = sizes.iterator(); iterator.hasNext();) {
+	      Size currSize =  iterator.next();
+	      if(optimalSize!=null) {
+	        //is the current size smaller than the one before
+	        if(optimalSize.height>currSize.height && optimalSize.width>currSize.width) {
+	          optimalSize = currSize;
+	        } else {
+	          optimalSize = currSize;
+	        }
+	      }else {
+	        optimalSize = currSize;
+	      }
+	      
+	    }
+	  }
+	  return optimalSize;
 	}
 
 }
