@@ -205,7 +205,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			BitmapFactory.Options opts = new Options();
 			opts.inJustDecodeBounds = true;
 			BitmapFactory.decodeByteArray(data, 0, data.length, opts);
-			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_HEIGHT, PHOTO_WIDTH);
+			opts.inSampleSize = calculateInSampleSize(opts, cameraView.getWidth(), cameraView.getHeight());
 			opts.inJustDecodeBounds = false;
 			opts.inPurgeable = true;
 			Bitmap finalBitmap = BitmapFactory.decodeByteArray(data, 0,
@@ -213,26 +213,32 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 			int width = finalBitmap.getWidth();
 			int height = finalBitmap.getHeight();
-			Matrix matrix = new Matrix();
-			matrix.postScale(PHOTO_WIDTH, PHOTO_HEIGHT);
-			finalBitmap = Bitmap.createScaledBitmap(finalBitmap, width, height, true);//(finalBitmap, 0, 0, width, height,matrix, false);
+
+			if(width>height){
+				Matrix matrix = new Matrix();
+				matrix.postRotate(90);
+				finalBitmap= Bitmap.createBitmap(finalBitmap, 0, 0, width, height,matrix, true);
+			}
+			//Matrix matrix = new Matrix();
+			//matrix.postScale(PHOTO_WIDTH, PHOTO_HEIGHT);
+			//finalBitmap = Bitmap.createScaledBitmap(finalBitmap, width, height, true);//(finalBitmap, 0, 0, width, height,matrix, false);
 			try {
-//				File file = new File(getExternalCacheDir().getPath()+
-//				"/image.jpg");
-//				file.getParentFile().mkdirs();
-//				RandomAccessFile randomAccessFile = new
-//				RandomAccessFile(file,"rw");
-//				FileChannel channel = randomAccessFile.getChannel();
-//				MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
-//				width* height * 4);
-//				finalBitmap.copyPixelsToBuffer(map);
-//				finalBitmap.recycle();
-//				finalBitmap = Bitmap.createBitmap(width,
-//				height,Config.ARGB_8888);
-//				map.position(0);
-//				finalBitmap.copyPixelsFromBuffer(map);
-//				channel.close();
-//				randomAccessFile.close();
+				// File file = new File(getExternalCacheDir().getPath()+
+				// "/image.jpg");
+				// file.getParentFile().mkdirs();
+				// RandomAccessFile randomAccessFile = new
+				// RandomAccessFile(file,"rw");
+				// FileChannel channel = randomAccessFile.getChannel();
+				// MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
+				// width* height * 4);
+				// finalBitmap.copyPixelsToBuffer(map);
+				// finalBitmap.recycle();
+				// finalBitmap = Bitmap.createBitmap(width,
+				// height,Config.ARGB_8888);
+				// map.position(0);
+				// finalBitmap.copyPixelsFromBuffer(map);
+				// channel.close();
+				// randomAccessFile.close();
 
 				Canvas finalCanvas = new Canvas(finalBitmap);
 				finalCanvas.setDensity(finalBitmap.getDensity());
@@ -266,6 +272,12 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		final int height = options.outHeight;
 		final int width = options.outWidth;
 		int inSampleSize = 1;
+		if((reqWidth<reqHeight && width>height) || (reqWidth>reqHeight && width<height)){
+			int tmp;
+			tmp = reqWidth;
+			reqWidth = reqHeight;
+			reqHeight = tmp;
+		}
 
 		if (height > reqHeight || width > reqWidth) {
 			final int heightRatio = Math.round((float) height

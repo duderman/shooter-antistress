@@ -251,13 +251,14 @@ public class GifView extends SurfaceView {
 
 	public void getFinalBitmap(Canvas c) {
 		Rect srcRect = decoder.getFrame(decoder.getFrameCount() - 1);
-		float propX = (float) (c.getWidth()) / (float) (this.getWidth());
-		float propY = (float) (c.getHeight()) / (float) (this.getHeight());
+		float propX = ((float)c.getWidth() / (float)this.getWidth());
+		float propY = ((float)c.getHeight() / (float)this.getHeight());
+		float ratio = propX < propY ? propX : propY;
 		Matrix matrix = new Matrix();
-		matrix.preScale(propX, propY);
+		matrix.postScale(ratio, ratio);
 		Bitmap finalBitmap = Bitmap.createBitmap(decoder.mainBitmap,
-				srcRect.left, srcRect.top, decoder.width, decoder.height,
-				matrix, false);
+				srcRect.left, srcRect.top, decoder.width, decoder.height, matrix, false);
+		// finalBitmap = Bitmap.createScaledBitmap(finalBitmap, decoder.width*ratio, decoder.height*ratio, true);
 		// int right = currentX+decoder.width;
 		// int bottom = currentY+decoder.height;
 		// Rect dstRect = new Rect(currentX, currentY, right, bottom);
