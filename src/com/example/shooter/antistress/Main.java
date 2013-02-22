@@ -205,7 +205,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			BitmapFactory.Options opts = new Options();
 			opts.inJustDecodeBounds = true;
 			BitmapFactory.decodeByteArray(data, 0, data.length, opts);
-			opts.inSampleSize = calculateInSampleSize(opts, cameraView.getWidth(), cameraView.getHeight());
+			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_WIDTH, PHOTO_HEIGHT);
 			opts.inJustDecodeBounds = false;
 			opts.inPurgeable = true;
 			Bitmap finalBitmap = BitmapFactory.decodeByteArray(data, 0,
