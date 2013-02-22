@@ -314,9 +314,9 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		int degrees = 90;
 		cam.setDisplayOrientation(degrees);
 		Camera.Parameters parameters = cam.getParameters();
-		Size optimalSize = getOptimalSize(parameters.getSupportedPictureSizes(), PHOTO_HEIGHT, PHOTO_WIDTH); 
+		Size optimalSize = getOptimalSize(parameters.getSupportedPictureSizes(), PHOTO_WIDTH, PHOTO_HEIGHT); 
 		parameters.setPictureSize(optimalSize.width, optimalSize.height);
-		optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(), cameraView.getHeight(), cameraView.getWidth());
+		optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(), cameraView.getWidth(), cameraView.getHeight());
 		parameters.setPreviewSize(optimalSize.width, optimalSize.height);
 		Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
 		int rotation = 0;
@@ -356,7 +356,10 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	    }
 	  }
 	  if(optimalSize == null) {
-		  optimalSize = sizes.get(0);
+	  	if(screenWidth < screenHeight)
+	  		optimalSize = getOptimalSize(sizes, screenHeight, screenWidth);
+	  	else
+			optimalSize = sizes.get(0);
 	  }
 	  return optimalSize;
 	}
