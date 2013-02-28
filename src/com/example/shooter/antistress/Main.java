@@ -2,7 +2,6 @@ package com.example.shooter.antistress;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -260,8 +259,9 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				intent.putExtra("finalImagePath", tmpFile.getPath());
 				startActivity(intent);
 			} catch (Exception e) {
-				e.printStackTrace();
-				// TODO: error message on saving fault
+				Log.e("Exception", "Exception while saving", e);
+				Toast.makeText(getApplicationContext(), "Can't save final photo. Sorry", Toast.LENGTH_LONG).show();
+				throwButton.performClick();
 			}
 
 		}
@@ -297,8 +297,10 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		Camera cam = null;
 		try {
 			cam = Camera.open();
+			if(cam == null)
+				throw new Exception("Don't have back facing camera");
 		} catch (Exception e) {
-			Log.e("Openin camera", e.getMessage());
+			Log.e("Exception", "Exception while opening camera", e);
 			Toast.makeText(
 					getApplicationContext(),
 					"Error opening camera. May be it unavailible or doesn't exist",
@@ -328,11 +330,11 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		}
 		parameters.setRotation(rotation);
 		parameters.set("orientation", "portrait");
-		cam.setParameters(parameters);
 		try {
+			cam.setParameters(parameters);
 			camera.setPreviewDisplay(cameraHolder);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			Log.e("Exception", "Exception while setting prev display", e);
 			cameraViewStatus = CameraViewStatusCodes.ERROR;
 			camera.release();
 		}

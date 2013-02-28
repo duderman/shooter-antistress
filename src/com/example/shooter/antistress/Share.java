@@ -17,6 +17,7 @@ import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -121,13 +122,12 @@ public class Share extends Activity {
 					mScanner.connect();
 				uri = Uri.fromFile(imageFile);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				// TODO: localize toasts
+				Log.e("Exception", "Exception while saving", e);
 				Toast.makeText(getApplicationContext(),
 						"Error creating file. Sorry :(", Toast.LENGTH_LONG)
 						.show();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e("Exception", "Exception while saving", e);
 				Toast.makeText(getApplicationContext(),
 						"Error writing file. Sorry :(", Toast.LENGTH_LONG)
 						.show();

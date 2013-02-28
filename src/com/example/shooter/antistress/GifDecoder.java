@@ -11,7 +11,6 @@ public class GifDecoder {
 	public int width;
 	public int height;
 	private int screenWidth;
-	private int screenHeight;
 	private int columnsCount;
 	private int rowsCount;
 	private int frameCount;
@@ -21,7 +20,6 @@ public class GifDecoder {
 
 	private final int STATUS_OK = 0;
 	private final int STATUS_ERROR = 1;
-	private final int STATUS_EXCEPTION = 2;
 	private final int STATUS_CLEAN = 3;
 	protected int status = STATUS_OK;
 
@@ -75,7 +73,6 @@ public class GifDecoder {
 	}
 
 	public void init(int width, int height, int duration, int rows, int columns) {
-		this.screenHeight = height;
 		this.screenWidth = width;
 		this.duration = duration;
 		this.rowsCount = rows;

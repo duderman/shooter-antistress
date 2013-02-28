@@ -1,5 +1,6 @@
 package com.example.shooter.antistress;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,6 +13,7 @@ import android.media.SoundPool;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 public class GifView extends SurfaceView {
 
@@ -207,8 +209,7 @@ public class GifView extends SurfaceView {
 						incrementFrameIndex();
 					}
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					showError();
 				}
 			}
 		}.start();
@@ -221,8 +222,8 @@ public class GifView extends SurfaceView {
 						updateCoordinates();
 					}
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Log.e("Exception", "Exception while drawing", e);
+					showError();
 				}
 			}
 		}.start();
@@ -233,11 +234,12 @@ public class GifView extends SurfaceView {
 				Thread.sleep(1000 / FPS);
 			}
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Log.e("Exception", "Exception while drawing", e);
+			showError();
 		}
 		currFrame = decoder.getFrameCount() - 1;
 		Draw();
-		final int result = sounds.play(endSound, 1.0f, 1.0f, 2, 0, 1.5f);
+		sounds.play(endSound, 1.0f, 1.0f, 2, 0, 1.5f);
 	}
 
 	public void pause() {
@@ -270,5 +272,10 @@ public class GifView extends SurfaceView {
 		Canvas c = this.getHolder().lockCanvas();
 		c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 		this.getHolder().unlockCanvasAndPost(c);
+	}
+	
+	private void showError(){
+		Toast.makeText(getContext(), "Error while drawing animation. Sorry!", Toast.LENGTH_LONG).show();
+		((Activity)getContext()).finish();
 	}
 }
