@@ -217,10 +217,9 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				Matrix matrix = new Matrix();
 				matrix.postRotate(90);
 				finalBitmap= Bitmap.createBitmap(finalBitmap, 0, 0, width, height,matrix, true);
+			} else {
+				finalBitmap = Bitmap.createScaledBitmap(finalBitmap, width, height-1, true);
 			}
-			//Matrix matrix = new Matrix();
-			//matrix.postScale(PHOTO_WIDTH, PHOTO_HEIGHT);
-			//finalBitmap = Bitmap.createScaledBitmap(finalBitmap, width, height, true);//(finalBitmap, 0, 0, width, height,matrix, false);
 			try {
 				// File file = new File(getExternalCacheDir().getPath()+
 				// "/image.jpg");
