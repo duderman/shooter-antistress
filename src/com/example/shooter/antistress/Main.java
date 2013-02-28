@@ -22,6 +22,8 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StatFs;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -112,7 +114,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		camera = Camera.open();
+		camera = getCamera();
 		if (cameraViewStatus == CameraViewStatusCodes.PAUSED) {
 			setCameraParameters(camera);
 			camera.startPreview();
@@ -204,7 +206,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			BitmapFactory.Options opts = new Options();
 			opts.inJustDecodeBounds = true;
 			BitmapFactory.decodeByteArray(data, 0, data.length, opts);
-			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_WIDTH, PHOTO_HEIGHT);
+			opts.inSampleSize = calculateInSampleSize(opts, PHOTO_WIDTH,
+					PHOTO_HEIGHT);
 			opts.inJustDecodeBounds = false;
 			opts.inPurgeable = true;
 			Bitmap finalBitmap = BitmapFactory.decodeByteArray(data, 0,
@@ -213,39 +216,39 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			int width = finalBitmap.getWidth();
 			int height = finalBitmap.getHeight();
 
-			if(width>height){
+			if (width > height) {
 				Matrix matrix = new Matrix();
 				matrix.postRotate(90);
-				finalBitmap= Bitmap.createBitmap(finalBitmap, 0, 0, width, height,matrix, true);
+				finalBitmap = Bitmap.createBitmap(finalBitmap, 0, 0, width,
+						height, matrix, true);
 			} else {
-				finalBitmap = Bitmap.createScaledBitmap(finalBitmap, width, height-1, true);
+				finalBitmap = Bitmap.createScaledBitmap(finalBitmap, width,
+						height - 1, true);
 			}
 			try {
-				// File file = new File(getExternalCacheDir().getPath()+
-				// "/image.jpg");
-				// file.getParentFile().mkdirs();
-				// RandomAccessFile randomAccessFile = new
-				// RandomAccessFile(file,"rw");
-				// FileChannel channel = randomAccessFile.getChannel();
-				// MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0,
-				// width* height * 4);
-				// finalBitmap.copyPixelsToBuffer(map);
-				// finalBitmap.recycle();
-				// finalBitmap = Bitmap.createBitmap(width,
-				// height,Config.ARGB_8888);
-				// map.position(0);
-				// finalBitmap.copyPixelsFromBuffer(map);
-				// channel.close();
-				// randomAccessFile.close();
-
 				Canvas finalCanvas = new Canvas(finalBitmap);
 				finalCanvas.setDensity(finalBitmap.getDensity());
 				weaponView.getFinalBitmap(finalCanvas);
 				finalCanvas.save();
 				finalCanvas = null;
-
-				File tmpFile = new File(getExternalCacheDir().getPath()
-						+ "/image.jpg");
+				
+				String fileName = "";
+				StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+				long bytesAvailable = (long)stat.getBlockSize() * (long)stat.getAvailableBlocks();
+				if(bytesAvailable < finalBitmap.getRowBytes()*finalBitmap.getHeight()){
+					stat = new StatFs(Environment.getRootDirectory().getPath());
+					bytesAvailable = (long)stat.getBlockSize() * (long)stat.getAvailableBlocks();
+					if(bytesAvailable < finalBitmap.getRowBytes()*finalBitmap.getHeight()){
+						throw new Exception("Not enough free memory");
+					} else {
+						fileName = getCacheDir().getPath()
+								+ "/image.jpg";
+					}
+				} else {
+					fileName = getExternalCacheDir().getPath()
+					+ "/image.jpg";
+				}
+				File tmpFile = new File(fileName);
 				FileOutputStream fos = new FileOutputStream(tmpFile);
 				finalBitmap.compress(CompressFormat.JPEG, 100, fos);
 				fos.flush();
@@ -259,7 +262,13 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				startActivity(intent);
 			} catch (Exception e) {
 				Log.e("Exception", "Exception while saving", e);
-				Toast.makeText(getApplicationContext(), "Can't save final photo. Sorry", Toast.LENGTH_LONG).show();
+				if(finalBitmap != null){
+					finalBitmap.recycle();
+				}
+				Toast.makeText(getApplicationContext(),
+						"Can't save final photo. Sorry", Toast.LENGTH_LONG)
+						.show();
+				throwButton.setEnabled(true);
 				throwButton.performClick();
 			}
 
@@ -271,7 +280,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		final int height = options.outHeight;
 		final int width = options.outWidth;
 		int inSampleSize = 1;
-		if((reqWidth<reqHeight && width>height) || (reqWidth>reqHeight && width<height)){
+		if ((reqWidth < reqHeight && width > height)
+				|| (reqWidth > reqHeight && width < height)) {
 			int tmp;
 			tmp = reqWidth;
 			reqWidth = reqHeight;
@@ -296,7 +306,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		Camera cam = null;
 		try {
 			cam = Camera.open();
-			if(cam == null)
+			if (cam == null)
 				throw new Exception("Don't have back facing camera");
 		} catch (Exception e) {
 			Log.e("Exception", "Exception while opening camera", e);
@@ -315,15 +325,18 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		int degrees = 90;
 		cam.setDisplayOrientation(degrees);
 		Camera.Parameters parameters = cam.getParameters();
-		Size optimalSize = getOptimalSize(parameters.getSupportedPictureSizes(), PHOTO_WIDTH, PHOTO_HEIGHT); 
+		Size optimalSize = getOptimalSize(
+				parameters.getSupportedPictureSizes(), PHOTO_WIDTH,
+				PHOTO_HEIGHT);
 		parameters.setPictureSize(optimalSize.width, optimalSize.height);
-		optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(), cameraView.getWidth(), cameraView.getHeight());
+		optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(),
+				cameraView.getWidth(), cameraView.getHeight());
 		parameters.setPreviewSize(optimalSize.width, optimalSize.height);
 		Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
 		int rotation = 0;
-		for(int id = 0; id<Camera.getNumberOfCameras();id++){
+		for (int id = 0; id < Camera.getNumberOfCameras(); id++) {
 			Camera.getCameraInfo(id, info);
-			if(info.facing == CameraInfo.CAMERA_FACING_BACK){
+			if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
 				rotation = info.orientation;
 			}
 		}
@@ -339,30 +352,32 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		}
 	}
 
-	public static Size getOptimalSize(List<Size> sizes, int screenWidth, int screenHeight) {
+	public static Size getOptimalSize(List<Size> sizes, int screenWidth,
+			int screenHeight) {
 		final double epsilon = 0.17;
-	  double aspectRatio = ((double)screenWidth)/screenHeight;
-	  Size optimalSize = null;
-	  for (Iterator<Size> iterator = sizes.iterator(); iterator.hasNext();) {
-	    Size currSize =  iterator.next();
-	    double curAspectRatio = ((double)currSize.width)/currSize.height;
-	    if ( Math.abs( aspectRatio - curAspectRatio ) < epsilon ) {
-	      if(optimalSize!=null) {
-	        if(optimalSize.height<currSize.height && optimalSize.width<currSize.width) {
-	          optimalSize = currSize;
-	        }
-	      } else {
-	        optimalSize = currSize;
-	      }
-	    }
-	  }
-	  if(optimalSize == null) {
-	  	if(screenWidth < screenHeight)
-	  		optimalSize = getOptimalSize(sizes, screenHeight, screenWidth);
-	  	else
-			optimalSize = sizes.get(0);
-	  }
-	  return optimalSize;
+		double aspectRatio = ((double) screenWidth) / screenHeight;
+		Size optimalSize = null;
+		for (Iterator<Size> iterator = sizes.iterator(); iterator.hasNext();) {
+			Size currSize = iterator.next();
+			double curAspectRatio = ((double) currSize.width) / currSize.height;
+			if (Math.abs(aspectRatio - curAspectRatio) < epsilon) {
+				if (optimalSize != null) {
+					if (optimalSize.height < currSize.height
+							&& optimalSize.width < currSize.width) {
+						optimalSize = currSize;
+					}
+				} else {
+					optimalSize = currSize;
+				}
+			}
+		}
+		if (optimalSize == null) {
+			if (screenWidth < screenHeight)
+				optimalSize = getOptimalSize(sizes, screenHeight, screenWidth);
+			else
+				optimalSize = sizes.get(0);
+		}
+		return optimalSize;
 	}
 
 }
