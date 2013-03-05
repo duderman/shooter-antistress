@@ -25,10 +25,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.util.Log;
+import android.view.Display;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -69,6 +72,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		cameraHolder.addCallback(this);
 		cameraHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		weaponView = ((GifView) findViewById(R.id.throwingObjectSurfaceView));
+		weaponView.setOnTouchListener(myOnTouchListener);
+		weaponView.setOnClickListener(null);
 		weaponHolder = weaponView.getHolder();
 		weaponHolder.addCallback(new SurfaceHolder.Callback() {
 			@Override
@@ -103,24 +108,25 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Log.d("watch", "onPause");
 		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
 			camera.stopPreview();
 			cameraViewStatus = CameraViewStatusCodes.PAUSED;
 		}
-		camera.release();
-		Log.d("watch", "onPause");
+		if (camera != null && cameraViewStatus != CameraViewStatusCodes.ERROR)
+			camera.release();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.d("watch", "onResume");
 		camera = getCamera();
 		if (cameraViewStatus == CameraViewStatusCodes.PAUSED) {
 			setCameraParameters(camera);
 			camera.startPreview();
 			cameraViewStatus = CameraViewStatusCodes.WAITING;
 		}
-		Log.d("watch", "onResume");
 	}
 
 	@Override
@@ -136,13 +142,15 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		setCameraParameters(camera);
 		throwButton.setEnabled(true);
-		if (cameraViewStatus == CameraViewStatusCodes.STARTING) {
-			camera.startPreview();
-			cameraViewStatus = CameraViewStatusCodes.WAITING;
-		} else if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
-			throwButton.performClick();
+		if (cameraViewStatus != CameraViewStatusCodes.ERROR) {
+			setCameraParameters(camera);
+			if (cameraViewStatus == CameraViewStatusCodes.STARTING) {
+				camera.startPreview();
+				cameraViewStatus = CameraViewStatusCodes.WAITING;
+			} else if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
+				throwButton.performClick();
+			}
 		}
 		Log.d("watch", "SurfaceCreated");
 	}
@@ -180,9 +188,24 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		}
 	};
 
+	OnTouchListener myOnTouchListener = new OnTouchListener() {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			Log.d("Touching", "event action: " + event.getAction());
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				weaponView.finalX = (int) event.getX();
+				weaponView.finalY = (int) event.getY();
+				throwButton.performClick();
+			}
+			return false;
+		}
+	};
+
 	AutoFocusCallback myAutoFocusCallback = new AutoFocusCallback() {
 		@Override
 		public void onAutoFocus(boolean success, Camera camera) {
+			camera.stopPreview();
+			Throw();
 			camera.takePicture(null, null, null, myPictureCallback);
 		}
 	};
@@ -200,7 +223,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 			Log.d("camera monitoring", "picture taken");
-			Throw();
+			//Throw();
 			cameraViewStatus = CameraViewStatusCodes.DRAWING_ENDED;
 
 			BitmapFactory.Options opts = new Options();
@@ -231,22 +254,25 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				weaponView.getFinalBitmap(finalCanvas);
 				finalCanvas.save();
 				finalCanvas = null;
-				
+
 				String fileName = "";
-				StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-				long bytesAvailable = (long)stat.getBlockSize() * (long)stat.getAvailableBlocks();
-				if(bytesAvailable < finalBitmap.getRowBytes()*finalBitmap.getHeight()){
+				StatFs stat = new StatFs(Environment
+						.getExternalStorageDirectory().getPath());
+				long bytesAvailable = (long) stat.getBlockSize()
+						* (long) stat.getAvailableBlocks();
+				if (bytesAvailable < finalBitmap.getRowBytes()
+						* finalBitmap.getHeight()) {
 					stat = new StatFs(Environment.getRootDirectory().getPath());
-					bytesAvailable = (long)stat.getBlockSize() * (long)stat.getAvailableBlocks();
-					if(bytesAvailable < finalBitmap.getRowBytes()*finalBitmap.getHeight()){
+					bytesAvailable = (long) stat.getBlockSize()
+							* (long) stat.getAvailableBlocks();
+					if (bytesAvailable < finalBitmap.getRowBytes()
+							* finalBitmap.getHeight()) {
 						throw new Exception("Not enough free memory");
 					} else {
-						fileName = getCacheDir().getPath()
-								+ "/image.jpg";
+						fileName = getCacheDir().getPath() + "/image.jpg";
 					}
 				} else {
-					fileName = getExternalCacheDir().getPath()
-					+ "/image.jpg";
+					fileName = getExternalCacheDir().getPath() + "/image.jpg";
 				}
 				File tmpFile = new File(fileName);
 				FileOutputStream fos = new FileOutputStream(tmpFile);
@@ -262,7 +288,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				startActivity(intent);
 			} catch (Exception e) {
 				Log.e("Exception", "Exception while saving", e);
-				if(finalBitmap != null){
+				if (finalBitmap != null) {
 					finalBitmap.recycle();
 				}
 				Toast.makeText(getApplicationContext(),
@@ -310,6 +336,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				throw new Exception("Don't have back facing camera");
 		} catch (Exception e) {
 			Log.e("Exception", "Exception while opening camera", e);
+			cameraViewStatus = CameraViewStatusCodes.ERROR;
 			Toast.makeText(
 					getApplicationContext(),
 					"Error opening camera. May be it unavailible or doesn't exist",
@@ -323,38 +350,44 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		if (cam == null)
 			cam = getCamera();
 		int degrees = 90;
-		cam.setDisplayOrientation(degrees);
 		Camera.Parameters parameters = cam.getParameters();
 		Size optimalSize = getOptimalSize(
 				parameters.getSupportedPictureSizes(), PHOTO_WIDTH,
 				PHOTO_HEIGHT);
+		Log.d("camera monitoring", "Optimal Sizes for picture is "
+				+ optimalSize.width + "x" + optimalSize.height);
 		parameters.setPictureSize(optimalSize.width, optimalSize.height);
+		Display display = getWindowManager().getDefaultDisplay();
 		optimalSize = getOptimalSize(parameters.getSupportedPreviewSizes(),
-				cameraView.getWidth(), cameraView.getHeight());
+				display.getWidth(), display.getHeight());
+		Log.d("camera monitoring", "Optimal Sizes for preview is "
+				+ optimalSize.width + "x" + optimalSize.height);
 		parameters.setPreviewSize(optimalSize.width, optimalSize.height);
 		Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
 		int rotation = 0;
 		for (int id = 0; id < Camera.getNumberOfCameras(); id++) {
 			Camera.getCameraInfo(id, info);
 			if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
-				rotation = info.orientation;
+				rotation = (info.orientation - degrees + 360) % 360;
 			}
 		}
 		parameters.setRotation(rotation);
 		parameters.set("orientation", "portrait");
+		cam.setDisplayOrientation(degrees);
 		try {
 			cam.setParameters(parameters);
 			camera.setPreviewDisplay(cameraHolder);
 		} catch (Exception e) {
 			Log.e("Exception", "Exception while setting prev display", e);
 			cameraViewStatus = CameraViewStatusCodes.ERROR;
-			camera.release();
+			if (camera != null)
+				camera.release();
 		}
 	}
 
 	public static Size getOptimalSize(List<Size> sizes, int screenWidth,
 			int screenHeight) {
-		final double epsilon = 0.17;
+		final double epsilon = 0.15;
 		double aspectRatio = ((double) screenWidth) / screenHeight;
 		Size optimalSize = null;
 		for (Iterator<Size> iterator = sizes.iterator(); iterator.hasNext();) {

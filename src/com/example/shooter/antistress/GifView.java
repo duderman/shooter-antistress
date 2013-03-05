@@ -24,7 +24,7 @@ public class GifView extends SurfaceView {
 	public static final int FPS = 30;
 
 	private GifDecoder decoder;
-	
+
 	SoundPool sounds = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 	private int startSound;
 	private int endSound;
@@ -32,7 +32,7 @@ public class GifView extends SurfaceView {
 	public int decodeStatus = DECODE_STATUS_UNDECODE;
 
 	private int startX, startY;
-	private int finalX, finalY;
+	public int finalX, finalY;
 	private int currentX, currentY;
 	private double speed;
 	private double angle;
@@ -133,12 +133,48 @@ public class GifView extends SurfaceView {
 	}
 
 	private void updateCoordinates() {
+		
 		currentX -= Math.round(speed * Math.cos(angle));
-		currentY -= Math.round(speed * Math.sin(angle));
+		if(startY>finalY)
+			currentY -= Math.round(speed * Math.sin(angle));
+		else
+			currentY += Math.round(speed * Math.sin(angle));
 		Log.d("Dimensions", "currentXY = { " + currentX + " ; " + currentY
 				+ " }");
-		if (currentX <= finalX && currentY <= finalY) {
-			stop();
+		if (startX > finalX && startY > finalY) {
+			if (currentX <= finalX && currentY <= finalY) {
+				stop();
+			}
+		}
+		if(startX<finalX && startY > finalY){
+			if(currentX>=finalX && currentY<=finalY){
+				stop();
+			}
+		}
+		if(startX>finalX && startY < finalY){
+			if(currentX<=finalX && currentY>=finalY){
+				stop();
+			}
+		}
+		if(startX == finalX && startY > finalY){
+			if(currentY<=finalY){
+				stop();
+			}
+		}
+		if(startX == finalX && startY < finalY){
+			if(currentY>finalY){
+				stop();
+			}
+		}
+		if(startY==finalY && startX > finalX){
+			if(currentX<=finalX){
+				stop();
+			}
+		}
+		if(startY==finalY && startX < finalX){
+			if(currentX>=finalX){
+				stop();
+			}
 		}
 	}
 
@@ -153,26 +189,31 @@ public class GifView extends SurfaceView {
 	public void play() {
 		while (decodeStatus != DECODE_STATUS_DECODED) {
 		}
-		finalX = (this.getWidth() - decoder.width)/ 2;
-		finalY = this.getHeight()/3 - (decoder.height) / 2;
-		
+		if (finalX == 0 || finalY == 0) {
+			finalX = (this.getWidth() - decoder.width) / 2;
+			finalY = this.getHeight() / 3 - decoder.height / 2;
+		} else {
+			finalX = finalX - decoder.width / 2;
+			finalY = finalY - (decoder.height) / 2;
+		}
+
 		switch (resId) {
 		default:
 		case R.drawable.animate_tomato:
-			this.startX = (this.getWidth()-decoder.width) / 2;
+			this.startX = (this.getWidth() - decoder.width) / 2;
 			this.startY = this.getHeight();
 			break;
 		case R.drawable.animate_bottle:
-			this.startX = (this.getWidth()-decoder.width) / 2;
+			this.startX = (this.getWidth() - decoder.width) / 2;
 			this.startY = this.getHeight();
 			break;
 		case R.drawable.animate_axe:
 			this.startX = (this.getWidth());
 			this.startY = this.getHeight() / 2;
-			this.finalX = this.getWidth()/2-decoder.width/3;
+			// this.finalX = this.getWidth()/2-decoder.width/3;
 			break;
 		case R.drawable.animate_egg:
-			this.startX = (this.getWidth()-decoder.width) / 2;
+			this.startX = (this.getWidth() - decoder.width) / 2;
 			this.startY = this.getHeight();
 			break;
 		case R.drawable.animate_knife:
@@ -182,16 +223,23 @@ public class GifView extends SurfaceView {
 		case R.drawable.animate_hunter_knife:
 			this.startX = (this.getWidth());
 			this.startY = this.getHeight() / 2;
-			this.finalX = this.getWidth()/2-decoder.width/3;
+			// this.finalX = this.getWidth()/2-decoder.width/3;
 			break;
 		}
-		this.angle = Math.atan((double) (startY - finalY) / (startX - finalX));
 		this.currentX = this.startX;
 		this.currentY = this.startY;
 		int vectX = finalX - startX;
 		int vectY = finalY - startY;
+		int secondVectX = startX - 10 - startX;
+		int secondVectY = startY - startY;
+		double cos = (double) (vectX * secondVectX + vectY
+				* secondVectY)
+				/ (Math.sqrt(Math.pow(vectX, 2) + Math.pow(vectY, 2)) * Math
+						.sqrt(Math.pow(secondVectX, 2)
+								+ Math.pow(secondVectY, 2)));
+		this.angle = Math.acos(cos);
 		double vectLength = Math.sqrt(Math.pow(vectX, 2) + Math.pow(vectY, 2));
-		double durby1000 = (double)decoder.duration / (double)1000;
+		double durby1000 = (double) decoder.duration / (double) 1000;
 		double lenbydur = vectLength / durby1000;
 		speed = Math.round(lenbydur / FPS);
 
@@ -253,17 +301,14 @@ public class GifView extends SurfaceView {
 
 	public void getFinalBitmap(Canvas c) {
 		Rect srcRect = decoder.getFrame(decoder.getFrameCount() - 1);
-		float propX = ((float)c.getWidth() / (float)this.getWidth());
-		float propY = ((float)c.getHeight() / (float)this.getHeight());
+		float propX = ((float) c.getWidth() / (float) this.getWidth());
+		float propY = ((float) c.getHeight() / (float) this.getHeight());
 		float ratio = propX < propY ? propX : propY;
 		Matrix matrix = new Matrix();
 		matrix.postScale(ratio, ratio);
 		Bitmap finalBitmap = Bitmap.createBitmap(decoder.mainBitmap,
-				srcRect.left, srcRect.top, decoder.width, decoder.height, matrix, false);
-		// finalBitmap = Bitmap.createScaledBitmap(finalBitmap, decoder.width*ratio, decoder.height*ratio, true);
-		// int right = currentX+decoder.width;
-		// int bottom = currentY+decoder.height;
-		// Rect dstRect = new Rect(currentX, currentY, right, bottom);
+				srcRect.left, srcRect.top, decoder.width, decoder.height,
+				matrix, false);
 		c.drawBitmap(finalBitmap, currentX * propX, currentY * propY, null);
 		release();
 	}
@@ -273,9 +318,10 @@ public class GifView extends SurfaceView {
 		c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 		this.getHolder().unlockCanvasAndPost(c);
 	}
-	
-	private void showError(){
-		Toast.makeText(getContext(), "Error while drawing animation. Sorry!", Toast.LENGTH_LONG).show();
-		((Activity)getContext()).finish();
+
+	private void showError() {
+		Toast.makeText(getContext(), "Error while drawing animation. Sorry!",
+				Toast.LENGTH_LONG).show();
+		((Activity) getContext()).finish();
 	}
 }
