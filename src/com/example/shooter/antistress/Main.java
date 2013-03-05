@@ -18,8 +18,8 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Environment;
@@ -47,6 +47,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	private SurfaceHolder cameraHolder;
 	private SurfaceHolder weaponHolder;
 	private Camera camera;
+	private boolean isFocusingNeeded = false;
 	private ImageButton throwButton;
 
 	private CameraViewStatusCodes cameraViewStatus = CameraViewStatusCodes.STARTING;
@@ -163,7 +164,11 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			case WAITING: {
 				cameraViewStatus = CameraViewStatusCodes.AUTOFOCUSING;
 				throwButton.setEnabled(false);
-				camera.autoFocus(myAutoFocusCallback);
+				if (isFocusingNeeded) {
+					camera.autoFocus(myAutoFocusCallback);
+				} else {
+					Throw();
+				}
 			}
 				break;
 			case DRAWING_ENDED: {
@@ -176,6 +181,10 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				Toast.makeText(getApplicationContext(),
 						"Something wrong with the camera", Toast.LENGTH_LONG)
 						.show();
+			}
+				break;
+			case DRAWING: {
+
 			}
 				break;
 			default: {
@@ -204,17 +213,6 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	AutoFocusCallback myAutoFocusCallback = new AutoFocusCallback() {
 		@Override
 		public void onAutoFocus(boolean success, Camera camera) {
-			camera.stopPreview();
-			Throw();
-			camera.takePicture(null, null, null, myPictureCallback);
-		}
-	};
-
-	ShutterCallback myShutterCallback = new ShutterCallback() {
-		@Override
-		public void onShutter() {
-			Log.d("camera monitoring", "shutter callback");
-			cameraViewStatus = CameraViewStatusCodes.DRAWING;
 			Throw();
 		}
 	};
@@ -223,7 +221,6 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 			Log.d("camera monitoring", "picture taken");
-			//Throw();
 			cameraViewStatus = CameraViewStatusCodes.DRAWING_ENDED;
 
 			BitmapFactory.Options opts = new Options();
@@ -325,6 +322,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	}
 
 	private void Throw() {
+		cameraViewStatus = CameraViewStatusCodes.DRAWING;
+		camera.takePicture(null, null, null, myPictureCallback);
 		weaponView.play();
 	}
 
@@ -373,6 +372,20 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		}
 		parameters.setRotation(rotation);
 		parameters.set("orientation", "portrait");
+		List<String> focusModes = parameters.getSupportedFocusModes();
+		String finalFocusMode = "";
+		if (focusModes.contains(Parameters.FOCUS_MODE_EDOF))
+			finalFocusMode = Parameters.FOCUS_MODE_EDOF;
+		else if (focusModes.contains(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))
+			finalFocusMode = Parameters.FOCUS_MODE_CONTINUOUS_VIDEO;
+		else if (focusModes.contains(Parameters.FOCUS_MODE_INFINITY))
+			finalFocusMode = Parameters.FOCUS_MODE_INFINITY;
+		else if (focusModes.contains(Parameters.FOCUS_MODE_AUTO)) {
+			finalFocusMode = Parameters.FOCUS_MODE_AUTO;
+			isFocusingNeeded = true;
+		}
+		if (finalFocusMode != "")
+			parameters.setFocusMode(finalFocusMode);
 		cam.setDisplayOrientation(degrees);
 		try {
 			cam.setParameters(parameters);

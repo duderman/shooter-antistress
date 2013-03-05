@@ -56,7 +56,7 @@ public class GifView extends SurfaceView {
 	}
 
 	private void setDimAndDecode() {
-		startX = startY = 0;
+		startX = startY = finalX = finalY = 0;
 		int columns = 1;
 		int rows = 1;
 		int duration = 1000;
@@ -133,9 +133,9 @@ public class GifView extends SurfaceView {
 	}
 
 	private void updateCoordinates() {
-		
+
 		currentX -= Math.round(speed * Math.cos(angle));
-		if(startY>finalY)
+		if (startY > finalY)
 			currentY -= Math.round(speed * Math.sin(angle));
 		else
 			currentY += Math.round(speed * Math.sin(angle));
@@ -146,36 +146,36 @@ public class GifView extends SurfaceView {
 				stop();
 			}
 		}
-		if(startX<finalX && startY > finalY){
-			if(currentX>=finalX && currentY<=finalY){
+		if (startX < finalX && startY > finalY) {
+			if (currentX >= finalX && currentY <= finalY) {
 				stop();
 			}
 		}
-		if(startX>finalX && startY < finalY){
-			if(currentX<=finalX && currentY>=finalY){
+		if (startX > finalX && startY < finalY) {
+			if (currentX <= finalX && currentY >= finalY) {
 				stop();
 			}
 		}
-		if(startX == finalX && startY > finalY){
-			if(currentY<=finalY){
-				stop();
+		if (Math.round(speed * Math.cos(angle)) == 0)
+			if (startY > finalY) {
+				if (currentY <= finalY) {
+					stop();
+				}
+			} else {
+				if (currentY > finalY) {
+					stop();
+				}
 			}
-		}
-		if(startX == finalX && startY < finalY){
-			if(currentY>finalY){
-				stop();
+		if (Math.round(speed * Math.sin(angle)) == 0)
+			if (startX > finalX) {
+				if (currentX <= finalX) {
+					stop();
+				}
+			} else {
+				if (currentX >= finalX) {
+					stop();
+				}
 			}
-		}
-		if(startY==finalY && startX > finalX){
-			if(currentX<=finalX){
-				stop();
-			}
-		}
-		if(startY==finalY && startX < finalX){
-			if(currentX>=finalX){
-				stop();
-			}
-		}
 	}
 
 	private void incrementFrameIndex() {
@@ -232,8 +232,7 @@ public class GifView extends SurfaceView {
 		int vectY = finalY - startY;
 		int secondVectX = startX - 10 - startX;
 		int secondVectY = startY - startY;
-		double cos = (double) (vectX * secondVectX + vectY
-				* secondVectY)
+		double cos = (double) (vectX * secondVectX + vectY * secondVectY)
 				/ (Math.sqrt(Math.pow(vectX, 2) + Math.pow(vectY, 2)) * Math
 						.sqrt(Math.pow(secondVectX, 2)
 								+ Math.pow(secondVectY, 2)));
