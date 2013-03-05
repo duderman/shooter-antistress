@@ -41,6 +41,6 @@
         android:layout_marginBottom="20dp"
         android:background="#00000000"
         android:scaleType="fitXY"
-        android:src="@drawable/main_shoot_button" />
+        android:src="@drawable/throw_button" />
 
 </RelativeLayout>
