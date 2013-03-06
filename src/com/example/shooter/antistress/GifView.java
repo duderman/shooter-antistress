@@ -56,7 +56,7 @@ public class GifView extends SurfaceView {
 	}
 
 	private void setDimAndDecode() {
-		startX = startY = finalX = finalY = 0;
+		startX = startY = 0;
 		int columns = 1;
 		int rows = 1;
 		int duration = 1000;

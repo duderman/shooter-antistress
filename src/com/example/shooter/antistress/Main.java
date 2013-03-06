@@ -112,21 +112,21 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		super.onPause();
 		Log.d("watch", "onPause");
 		if (cameraViewStatus == CameraViewStatusCodes.WAITING) {
-			mCamera.stopPreview();
+			camera.stopPreview();
 			cameraViewStatus = CameraViewStatusCodes.PAUSED;
 		}
-		if (mCamera != null && cameraViewStatus != CameraViewStatusCodes.ERROR)
-			mCamera.release();
+		if (camera != null && cameraViewStatus != CameraViewStatusCodes.ERROR)
+			camera.release();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		Log.d("watch", "onResume");
-		mCamera = getCamera();
+		camera = getCamera();
 		if (cameraViewStatus == CameraViewStatusCodes.PAUSED) {
-			setCameraParameters(mCamera);
-			mCamera.startPreview();
+			setCameraParameters(camera);
+			camera.startPreview();
 			cameraViewStatus = CameraViewStatusCodes.WAITING;
 		}
 	}
@@ -146,9 +146,9 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	public void surfaceCreated(SurfaceHolder holder) {
 		throwButton.setEnabled(true);
 		if (cameraViewStatus != CameraViewStatusCodes.ERROR) {
-			setCameraParameters(mCamera);
+			setCameraParameters(camera);
 			if (cameraViewStatus == CameraViewStatusCodes.STARTING) {
-				mCamera.startPreview();
+				camera.startPreview();
 				cameraViewStatus = CameraViewStatusCodes.WAITING;
 			} else if (cameraViewStatus == CameraViewStatusCodes.DRAWING_ENDED) {
 				throwButton.performClick();
@@ -174,8 +174,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				break;
 			case DRAWING_ENDED: {
 				cameraViewStatus = CameraViewStatusCodes.WAITING;
-				setCameraParameters(mCamera);
-				mCamera.startPreview();
+				setCameraParameters(camera);
+				camera.startPreview();
 			}
 				break;
 			case ERROR: {
@@ -390,12 +390,12 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		cam.setDisplayOrientation(degrees);
 		try {
 			cam.setParameters(parameters);
-			mCamera.setPreviewDisplay(cameraHolder);
+			camera.setPreviewDisplay(cameraHolder);
 		} catch (Exception e) {
 			Log.e("Exception", "Exception while setting prev display", e);
 			cameraViewStatus = CameraViewStatusCodes.ERROR;
-			if (mCamera != null)
-				mCamera.release();
+			if (camera != null)
+				camera.release();
 		}
 	}
 
