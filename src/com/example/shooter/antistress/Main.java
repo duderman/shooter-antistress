@@ -91,6 +91,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 					weaponView.setGif(resId);
 				else
 					weaponView.setGif(R.id.tomatoImageButton);
+				Toast.makeText(getApplicationContext(), "Tap on screen or press Throw button", Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
@@ -374,19 +375,22 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		parameters.setRotation(rotation);
 		parameters.set("orientation", "portrait");
 		List<String> focusModes = parameters.getSupportedFocusModes();
-		String finalFocusMode = "";
-		if (focusModes.contains(Parameters.FOCUS_MODE_EDOF))
-			finalFocusMode = Parameters.FOCUS_MODE_EDOF;
-		else if (focusModes.contains(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))
-			finalFocusMode = Parameters.FOCUS_MODE_CONTINUOUS_VIDEO;
-		else if (focusModes.contains(Parameters.FOCUS_MODE_INFINITY))
-			finalFocusMode = Parameters.FOCUS_MODE_INFINITY;
-		else if (focusModes.contains(Parameters.FOCUS_MODE_AUTO)) {
-			finalFocusMode = Parameters.FOCUS_MODE_AUTO;
-			isFocusingNeeded = true;
+		if (focusModes != null) {
+			String finalFocusMode = "";
+			if (focusModes.contains(Parameters.FOCUS_MODE_EDOF))
+				finalFocusMode = Parameters.FOCUS_MODE_EDOF;
+			else if (focusModes
+					.contains(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))
+				finalFocusMode = Parameters.FOCUS_MODE_CONTINUOUS_VIDEO;
+			else if (focusModes.contains(Parameters.FOCUS_MODE_INFINITY))
+				finalFocusMode = Parameters.FOCUS_MODE_INFINITY;
+			else if (focusModes.contains(Parameters.FOCUS_MODE_AUTO)) {
+				finalFocusMode = Parameters.FOCUS_MODE_AUTO;
+				isFocusingNeeded = true;
+			}
+			if (finalFocusMode != "")
+				parameters.setFocusMode(finalFocusMode);
 		}
-		if (finalFocusMode != "")
-			parameters.setFocusMode(finalFocusMode);
 		cam.setDisplayOrientation(degrees);
 		try {
 			cam.setParameters(parameters);
