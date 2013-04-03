@@ -69,7 +69,7 @@ public class GifDecoder {
 			this.width = mainBitmap.getWidth() / this.columnsCount;
 			this.height = mainBitmap.getHeight() / this.rowsCount;
 			this.frameCount = this.columnsCount;
-			this.delay = this.duration / (this.frameCount - 1);
+			this.delay = this.duration / this.frameCount;
 		}
 		return status;
 	}
