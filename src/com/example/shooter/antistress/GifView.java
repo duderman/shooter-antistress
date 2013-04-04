@@ -81,7 +81,7 @@ public class GifView extends SurfaceView {
 			this.resId = R.drawable.animate_axe;
 			endSound = sounds.load(getContext(), R.raw.axe, 2);
 			columns = 6;
-//			duration = 500;
+			// duration = 500;
 			break;
 		case R.id.eggImageButton:
 			this.resId = R.drawable.animate_egg;
@@ -93,7 +93,7 @@ public class GifView extends SurfaceView {
 			this.resId = R.drawable.animate_knife;
 			endSound = sounds.load(getContext(), R.raw.knife, 2);
 			columns = 7;
-//			duration = 500;
+			// duration = 500;
 			break;
 		case R.id.hunterKnifeImageButton:
 			this.resId = R.drawable.animate_hunter_knife;
@@ -198,11 +198,11 @@ public class GifView extends SurfaceView {
 		while (decodeStatus != DECODE_STATUS_DECODED) {
 		}
 		if (finalX == 0 || finalY == 0) {
-			finalX = (this.getWidth()) / 2;
+			finalX = (this.getWidth() - decoder.width) / 2;
 			finalY = this.getHeight() / 3 - decoder.height / 2;
 		} else {
-			finalX = finalX / 2;
-			finalY = finalY - (decoder.height) / 2;
+			finalX = finalX - decoder.width / 2;
+			finalY = finalY - decoder.height / 2;
 		}
 
 		this.startX = this.getWidth() - decoder.width;
@@ -224,14 +224,14 @@ public class GifView extends SurfaceView {
 		double vectLength = Math.sqrt(Math.pow(vectX, 2) + Math.pow(vectY, 2));
 		double durby1000 = (double) (decoder.duration) / (double) 1000;
 		double lenbydur = vectLength / durby1000;
-		speed = Math.round(lenbydur / FPS)/loops;
+		speed = Math.round(lenbydur / FPS) / loops;
 
 		Log.d("Dimensions", "startXY= { " + startX + " ; " + startY
 				+ " }; finalXY={ " + finalX + " ; " + finalY + " }; speed= "
 				+ Math.round(speed) + " angel= " + angle);
 
 		playFlag = true;
-		new Thread() {
+		Thread framingThread = new Thread() {
 			@Override
 			public void run() {
 				while (playFlag || currFrame != 0) {
@@ -243,26 +243,28 @@ public class GifView extends SurfaceView {
 					incrementFrameIndex();
 				}
 			}
-		}.start();
-		new Thread() {
+		};
+		Thread coordinateThread = new Thread() {
 			@Override
 			public void run() {
-				try {
-					while (playFlag) {
+				while (playFlag) {
+					try {
 						sleep(1000 / FPS);
-						updateCoordinates();
+					} catch (InterruptedException e) {
+						Log.e("Exception", "Exception while drawing", e);
+						showError();
 					}
-				} catch (InterruptedException e) {
-					Log.e("Exception", "Exception while drawing", e);
-					showError();
+					updateCoordinates();
 				}
 			}
-		}.start();
+		};
 		try {
 			sounds.play(startSound, 1.0f, 1.0f, 1, 0, 1.5f);
+			framingThread.start();
+			coordinateThread.start();
 			while (playFlag || currFrame != 0) {
 				Draw();
-				Thread.sleep(1000/FPS);
+				Thread.sleep(1000 / FPS);
 			}
 		} catch (InterruptedException e) {
 			Log.e("Exception", "Exception while drawing", e);
@@ -290,13 +292,13 @@ public class GifView extends SurfaceView {
 	public void getFinalBitmap(Canvas c) {
 		float propX = ((float) c.getWidth() / (float) this.getWidth());
 		float propY = ((float) c.getHeight() / (float) this.getHeight());
-		c.drawBitmap(decoder.mainBitmap, decoder.getFrame(
-				decoder.getFrameCount() - 1, 1), new Rect(
-					Math.round(currentX * propX), 
-					Math.round(currentY * propY),
-					Math.round(currentX * propX + decoder.width * propX),
-					Math.round(currentY * propY + decoder.height * propY)),
-				null);
+		c.drawBitmap(
+				decoder.mainBitmap,
+				decoder.getFrame(decoder.getFrameCount() - 1, 1),
+				new Rect(Math.round(currentX * propX), Math.round(currentY
+						* propY), Math.round(currentX * propX + decoder.width
+						* propX), Math.round(currentY * propY + decoder.height
+						* propY)), null);
 		release();
 	}
 
