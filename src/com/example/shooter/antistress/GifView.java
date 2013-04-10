@@ -39,9 +39,10 @@ public class GifView extends SurfaceView {
 	private boolean playFlag = false;
 	private int currFrame;
 	private int currRow;
-	private int loops = 2;
+	private final int loops = 2;
 	private int initialBitmapScale = 2;
 	private int resId;
+	private int looped;
 
 	public GifView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -61,7 +62,8 @@ public class GifView extends SurfaceView {
 		startX = startY = finalX = finalY = 0;
 		int columns = 1;
 		int rows = 2;
-		int duration = 600;
+		int duration = 500;
+		looped = 0;
 
 		startSound = sounds.load(getContext(), R.raw.throwing, 1);
 
@@ -81,7 +83,6 @@ public class GifView extends SurfaceView {
 			this.resId = R.drawable.animate_axe;
 			endSound = sounds.load(getContext(), R.raw.axe, 2);
 			columns = 6;
-			// duration = 500;
 			break;
 		case R.id.eggImageButton:
 			this.resId = R.drawable.animate_egg;
@@ -93,13 +94,11 @@ public class GifView extends SurfaceView {
 			this.resId = R.drawable.animate_knife;
 			endSound = sounds.load(getContext(), R.raw.knife, 2);
 			columns = 7;
-			// duration = 500;
 			break;
 		case R.id.hunterKnifeImageButton:
 			this.resId = R.drawable.animate_hunter_knife;
 			endSound = sounds.load(getContext(), R.raw.hunter_knife, 2);
-			columns = 5;
-			duration = 300;
+			columns = 8;
 			break;
 		}
 
@@ -132,7 +131,7 @@ public class GifView extends SurfaceView {
 				currRow), new Rect(currentX, currentY, currentX + currentW,
 				currentY + currentH), null);
 		getHolder().unlockCanvasAndPost(canvas);
-		Log.d("Drawed", "Canvas rendered");
+		Log.d("Drawed", "Canvas rendered currentW="+currentW+"; currentH="+currentH);
 	}
 
 	private void updateCoordinates() {
@@ -190,6 +189,9 @@ public class GifView extends SurfaceView {
 		currFrame++;
 		if (currFrame >= decoder.getFrameCount()) {
 			currFrame = 0;
+			looped++;
+			if(looped >= loops)
+				stop();
 		}
 		Log.d("nextFrame", "" + currFrame);
 	}
@@ -221,10 +223,11 @@ public class GifView extends SurfaceView {
 						.sqrt(Math.pow(secondVectX, 2)
 								+ Math.pow(secondVectY, 2)));
 		this.angle = Math.acos(cos);
-		double vectLength = Math.sqrt(Math.pow(vectX, 2) + Math.pow(vectY, 2));
+		double vectLength = Math.sqrt(Math.pow(vectX, 2) + Math.pow(vectY, 2))
+				/ (double) loops;
 		double durby1000 = (double) (decoder.duration) / (double) 1000;
 		double lenbydur = vectLength / durby1000;
-		speed = Math.round(lenbydur / FPS) / loops;
+		speed = lenbydur / (double) FPS;
 
 		Log.d("Dimensions", "startXY= { " + startX + " ; " + startY
 				+ " }; finalXY={ " + finalX + " ; " + finalY + " }; speed= "
@@ -234,20 +237,20 @@ public class GifView extends SurfaceView {
 		Thread framingThread = new Thread() {
 			@Override
 			public void run() {
-				while (playFlag || currFrame != 0) {
+				do {
 					try {
 						sleep(decoder.getDelay());
 					} catch (InterruptedException e) {
 						showError();
 					}
 					incrementFrameIndex();
-				}
+				} while (playFlag || currFrame != 0);
 			}
 		};
 		Thread coordinateThread = new Thread() {
 			@Override
 			public void run() {
-				while (playFlag) {
+				do {
 					try {
 						sleep(1000 / FPS);
 					} catch (InterruptedException e) {
@@ -255,17 +258,17 @@ public class GifView extends SurfaceView {
 						showError();
 					}
 					updateCoordinates();
-				}
+				} while (playFlag);
 			}
 		};
 		try {
 			sounds.play(startSound, 1.0f, 1.0f, 1, 0, 1.5f);
-			framingThread.start();
 			coordinateThread.start();
-			while (playFlag || currFrame != 0) {
-				Draw();
+			framingThread.start();
+			do {
 				Thread.sleep(1000 / FPS);
-			}
+				Draw();
+			} while (playFlag || currFrame != 0);
 		} catch (InterruptedException e) {
 			Log.e("Exception", "Exception while drawing", e);
 			showError();
