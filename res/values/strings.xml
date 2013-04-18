@@ -2,17 +2,23 @@
 <resources>
 
     <string name="app_name">Shooter Antistress</string>
-    <string name="menu_settings">Settings</string>
-    <string name="title_activity_main">Shooter Antistress</string>
-    <string name="menu_name_title">Shooter \nAntistress</string>
     <string name="menu_greeting">Welcome! \nSelect a subject:</string>
-    <string name="throw_button_caption">Throw!</string>
-    <string name="title_activity_camera">Throw object!</string>
-    <string name="save_button_caption">Save</string>
-    <string name="share_button_caption">Share</string>
-    <string name="title_share_camera">Share this with...</string>
-    <string name="throw_button_back_caption">Back</string>
-    <string name="title_activity_share">Share</string>
+    <string name="how_to">Tap on screen or press Throw button</string>
+    <string name="title_share_camera">Share this with&#8230;</string>
+
+
     <string name="intent_extra_name">objectId</string>
+
+
+    <string name="animation_error">Error while drawing animation. Sorry!</string>
+    <string name="camera_error">Something wrong with the camera</string>
+    <string name="save_error">Can\'t save final photo. Sorry</string>
+    <string name="camera_open_error">Error opening camera. May be it unavailable or doesn\'t exist</string>
+    <string name="create_error">Error creating file. Sorry :(</string>
+    <string name="write_error">Error writing file. Sorry :(</string>
+    <string name="free_space_error">You don\'t have enough free space</string>
+    <string name="storage_error">Your storage is unplugged</string>
+
+    <string name="save_success">Saving succeful</string>
 
 </resources>

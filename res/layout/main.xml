@@ -34,7 +34,7 @@
 
     <ImageButton
         android:id="@+id/shootImageButton"
-        android:layout_width="100dp"
+        android:layout_width="120dp"
         android:layout_height="100dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"

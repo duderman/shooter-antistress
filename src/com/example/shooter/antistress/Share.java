@@ -74,7 +74,7 @@ public class Share extends Activity {
 			Uri fileUri = saveFinalImage();
 			if (fileUri != Uri.EMPTY) {
 				saveButton.setEnabled(false);
-				Toast.makeText(getApplicationContext(), "Saving succeful",
+				Toast.makeText(getApplicationContext(), R.string.save_success,
 						Toast.LENGTH_SHORT).show();
 			}
 		}
@@ -137,25 +137,25 @@ public class Share extends Activity {
 				} catch (FileNotFoundException e) {
 					Log.e("Exception", "Exception while saving", e);
 					Toast.makeText(getApplicationContext(),
-							"Error creating file. Sorry :(", Toast.LENGTH_LONG)
+							R.string.create_error, Toast.LENGTH_LONG)
 							.show();
 				} catch (Exception e) {
 					Log.e("Exception", "Exception while saving", e);
 					Toast.makeText(getApplicationContext(),
-							"Error writing file. Sorry :(", Toast.LENGTH_LONG)
+							R.string.write_error, Toast.LENGTH_LONG)
 							.show();
 				} finally {
 					tmpBmp.recycle();
 				}
 			} else {
 				Toast.makeText(getApplicationContext(),
-						"You don't have enough free space", Toast.LENGTH_LONG)
+						R.string.free_space_error, Toast.LENGTH_LONG)
 						.show();
 				tmpBmp.recycle();
 			}
 		} else {
 			Toast.makeText(getApplicationContext(),
-					"Your storage is unplugged", Toast.LENGTH_LONG)
+					R.string.storage_error, Toast.LENGTH_LONG)
 					.show();
 		}
 

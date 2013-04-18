@@ -13,8 +13,8 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.example.helpers.GifDecoder;
-import com.example.helpers.Timer;
+import com.example.shooter.antistress.helpers.GifDecoder;
+import com.example.shooter.antistress.helpers.Timer;
 
 public class GifView extends SurfaceView {
 
@@ -333,7 +333,7 @@ public class GifView extends SurfaceView {
 	}
 
 	private void showError() {
-		Toast.makeText(getContext(), "Error while drawing animation. Sorry!",
+		Toast.makeText(getContext(), R.string.animation_error,
 				Toast.LENGTH_LONG).show();
 		((Activity) getContext()).finish();
 	}

@@ -91,7 +91,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 					weaponView.setGif(resId);
 				else
 					weaponView.setGif(R.id.tomatoImageButton);
-				Toast.makeText(getApplicationContext(), "Tap on screen or press Throw button", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.how_to, Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
@@ -182,7 +182,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				break;
 			case ERROR: {
 				Toast.makeText(getApplicationContext(),
-						"Something wrong with the camera", Toast.LENGTH_LONG)
+						R.string.camera_error, Toast.LENGTH_LONG)
 						.show();
 			}
 				break;
@@ -292,7 +292,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 					finalBitmap.recycle();
 				}
 				Toast.makeText(getApplicationContext(),
-						"Can't save final photo. Sorry", Toast.LENGTH_LONG)
+						R.string.save_error, Toast.LENGTH_LONG)
 						.show();
 				throwButton.setEnabled(true);
 				throwButton.performClick();
@@ -341,7 +341,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 			cameraViewStatus = CameraViewStatusCodes.ERROR;
 			Toast.makeText(
 					getApplicationContext(),
-					"Error opening camera. May be it unavailible or doesn't exist",
+					R.string.camera_open_error,
 					Toast.LENGTH_LONG).show();
 			finish();
 		}

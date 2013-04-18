@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Shooter Antistress</string>
+    <string name="menu_greeting">Добро пожаловать!\nВыберите предмет:</string>
+    <string name="title_share_camera">Отправить с помощью&#8230;</string>
+    <string name="how_to">Тапните по экрану или нажмите кнопку "Выстрел!"</string>
+
+
+    <string name="intent_extra_name">objectId</string>
+
+
+    <string name="animation_error">Ошибка во время отображения анимации. Извините!</string>
+    <string name="camera_error">Что-то не так с камерой</string>
+    <string name="save_error">Не удалось сохранить изображение</string>
+    <string name="camera_open_error">Ошибка при подключении к камере. Возможно она занята или не существует?</string>
+    <string name="create_error">Ошибка при создании файла. Извините :(</string>
+    <string name="write_error">Ошибка при записи в файл. Извините :(</string>
+    <string name="free_space_error">Недостаточнно свободного места</string>
+    <string name="storage_error">Хранилище недоступно</string>
+
+    <string name="save_success">Сохранено!</string>
+
+</resources>

@@ -1,4 +1,4 @@
-package com.example.helpers;
+package com.example.shooter.antistress.helpers;
 
 public class Timer {
 	public long startTime = 0;
