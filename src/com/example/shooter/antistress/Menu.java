@@ -17,7 +17,7 @@ public class Menu extends Activity implements OnClickListener {
 		setContentView(R.layout.menu);
 
 		this.findViewById(R.id.tomatoImageButton).setOnClickListener(this);
-		this.findViewById(R.id.bottleImageButton).setOnClickListener(this);
+		this.findViewById(R.id.pieImageButton).setOnClickListener(this);
 		this.findViewById(R.id.axeImageButton).setOnClickListener(this);
 		this.findViewById(R.id.eggImageButton).setOnClickListener(this);
 		this.findViewById(R.id.knifeImageButton).setOnClickListener(this);

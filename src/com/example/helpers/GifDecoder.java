@@ -1,4 +1,4 @@
-package com.example.shooter.antistress;
+package com.example.helpers;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -35,11 +35,13 @@ public class GifDecoder {
 		return frameCount;
 	}
 
-	public Rect getFrame(int n) {
+	public Rect getFrame(int n, int row) {
 		if (frameCount <= 0)
 			return null;
+		if(n>columnsCount-1 || row > rowsCount-1)
+			return new Rect((columnsCount-1)*width, (rowsCount-1)*height, (columnsCount-1)*width + width, (rowsCount-1)*height + height);
 		int srcX = n * width;
-		int srcY = 0;
+		int srcY = row * height;
 		return new Rect(srcX, srcY, srcX + width, srcY + height);
 	}
 
@@ -56,9 +58,9 @@ public class GifDecoder {
 	public int readFile(Resources res, int srcId) {
 		clear();
 		BitmapFactory.Options opts = new Options();
-		opts.inJustDecodeBounds = true;
-		BitmapFactory.decodeResource(res, srcId, opts);
-		opts.inSampleSize = calculateInSampleSize(opts, this.screenWidth*2);
+		 opts.inJustDecodeBounds = true;
+		 BitmapFactory.decodeResource(res, srcId, opts);
+		 opts.inSampleSize = calculateInSampleSize(opts, (this.screenWidth/3)*columnsCount);
 		opts.inJustDecodeBounds = false;
 		mainBitmap = BitmapFactory.decodeResource(res, srcId, opts);
 		if (mainBitmap == null) {
@@ -67,7 +69,7 @@ public class GifDecoder {
 			this.width = mainBitmap.getWidth() / this.columnsCount;
 			this.height = mainBitmap.getHeight() / this.rowsCount;
 			this.frameCount = this.columnsCount;
-			this.delay = this.duration / (this.frameCount-1);
+			this.delay = this.duration / this.frameCount;
 		}
 		return status;
 	}
