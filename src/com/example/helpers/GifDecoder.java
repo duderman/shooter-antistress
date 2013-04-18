@@ -1,4 +1,4 @@
-package com.example.shooter.antistress;
+package com.example.helpers;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

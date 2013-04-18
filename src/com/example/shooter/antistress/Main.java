@@ -66,7 +66,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.main);
-
+		
 		resId = getIntent().getIntExtra(getString(R.string.intent_extra_name),
 				-1);
 		cameraView = (SurfaceView) findViewById(R.id.cameraSurfaceView);
@@ -140,12 +140,13 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
+		weaponView.footerHeight = findViewById(R.id.footerImageView).getHeight();
 		Log.d("watch", "SurfaceChanged");
 	}
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		throwButton.setEnabled(true);
+		throwButton.setEnabled(true);		
 		if (cameraViewStatus != CameraViewStatusCodes.ERROR) {
 			setCameraParameters(camera);
 			if (cameraViewStatus == CameraViewStatusCodes.STARTING) {
