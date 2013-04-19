@@ -82,7 +82,7 @@ public class GifView extends SurfaceView {
 			break;
 		case R.id.pieImageButton:
 			this.resId = R.drawable.animate_pie;
-			endSound = sounds.load(getContext(), R.raw.bottle, 2);
+			endSound = sounds.load(getContext(), R.raw.pie, 2);
 			columns = 7;
 			loops = 1;
 			duration = 800;
