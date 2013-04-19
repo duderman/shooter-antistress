@@ -204,7 +204,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			Log.d("Touching", "event action: " + event.getAction());
-			if (event.getAction() == MotionEvent.ACTION_UP) {
+			if (event.getAction() == MotionEvent.ACTION_UP && cameraViewStatus == CameraViewStatusCodes.WAITING) {
 				weaponView.finalX = (int) event.getX();
 				weaponView.finalY = (int) event.getY();
 				throwButton.performClick();
