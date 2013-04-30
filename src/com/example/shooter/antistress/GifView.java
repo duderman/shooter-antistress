@@ -277,7 +277,7 @@ public class GifView extends SurfaceView {
 		};
 		Timer timer = new Timer();
 		try {
-			sounds.play(startSound, 1.0f, 1.0f, 1, 0, 1.5f);
+			sounds.play(startSound, 0.8f, 1.0f, 1, 0, 1.5f);
 			coordinateThread.start();
 			framingThread.start();
 			 while (playFlag || currFrame != 0) {
@@ -293,7 +293,7 @@ public class GifView extends SurfaceView {
 		}
 		currentH = decoder.height;
 		currentW = decoder.width;
-		sounds.play(endSound, 1.0f, 1.0f, 2, 0, 1.5f);
+		sounds.play(endSound, 0.8f, 1.0f, 2, 0, 1.5f);
 		currRow = 1;
 		for (currFrame = 0; currFrame < decoder.getFrameCount(); currFrame++) {
 			timer.start();

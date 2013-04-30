@@ -21,6 +21,7 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -65,6 +66,8 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 //		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.main);
+		
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		
 		resId = getIntent().getIntExtra(getString(R.string.intent_extra_name),
 				-1);
@@ -175,6 +178,7 @@ public class Main extends Activity implements SurfaceHolder.Callback {
 				break;
 			case DRAWING_ENDED: {
 				cameraViewStatus = CameraViewStatusCodes.WAITING;
+				weaponView.clear();
 				setCameraParameters(camera);
 				camera.startPreview();
 			}
